@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>VELOCIA MOTORS — Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <span>V</span>
+            VELOCIA
+        </div>
+
+        <div class="admin-label">
+            ADMIN PANEL
+        </div>
+
+        <nav>
+            <button class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
+                 <span>▣</span>
+                 Dashboard
+            </button>
+
+            <button class="nav-item" data-section="bookings" onclick="showSection('bookings')">
+                <span>◫</span>
+                Bookings
+            </button>
+
+            <button class="nav-item" data-section="requests" onclick="showSection('requests')">
+                 <span>◉</span>
+                 Purchase Requests
+            </button>
+
+           <button class="nav-item" data-section="customers" onclick="showSection('customers')">
+                <span>♙</span>
+                Customers
+            </button>
+            <button class="nav-item" data-section="cars" onclick="showSection('cars')">
+                 <span>🚘</span>
+                 Cars
+            </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="../index.html">
+                ← Back to Website
+            </a>
+
+            <button
+                onclick="logoutAdmin()"
+                class="logout-btn"
+            >
+                ⎋ Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="page-label">
+                    VELOCIA MOTORS
+                </div>
+
+                <h1 id="pageTitle">
+                    Admin Dashboard
+                </h1>
+
+            </div>
+
+            <div class="admin-profile">
+
+                <div class="profile-icon">
+                    A
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                    <small>
+                        System Admin
+                    </small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================================
+             DASHBOARD
+        ========================================== -->
+
+        <section
+            id="dashboard"
+            class="section active-section"
+        >
+
+            <div class="welcome">
+
+                <div>
+
+                    <span>
+                        CONTROL CENTER
+                    </span>
+
+                    <h2>
+                        Welcome back, Admin.
+                    </h2>
+
+                    <p>
+                        Manage customers, bookings,
+                        vehicles and purchase requests
+                        from one place.
+                    </p>
+
+                </div>
+
+                <div class="welcome-mark">
+                    V
+                </div>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ♙
+                    </div>
+
+                    <div>
+
+                        <small>
+                            Customers
+                        </small>
+
+                        <strong id="customerCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ◷
+                    </div>
+
+                    <div>
+
+                        <small>
+                            Bookings
+                        </small>
+
+                        <strong id="bookingCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ◈
+                    </div>
+
+                    <div>
+
+                        <small>
+                            Purchase Requests
+                        </small>
+
+                        <strong id="requestCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🚘
+                    </div>
+
+                    <div>
+
+                        <small>
+                            Cars
+                        </small>
+
+                        <strong id="carCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        !
+                    </div>
+
+                    <div>
+
+                        <small>
+                            Pending
+                        </small>
+
+                        <strong id="pendingCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <span>
+                            RECENT ACTIVITY
+                        </span>
+
+                        <h3>
+                            Purchase Requests
+                        </h3>
+
+                    </div>
+
+                    <button
+                        onclick="showSection('requests')"
+                    >
+                        View All →
+                    </button>
+
+                </div>
+
+
+                <div id="dashboardRequests">
+
+                    <div class="loading">
+                        Loading...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             BOOKINGS
+        ========================================== -->
+
+        <section
+            id="bookings"
+            class="section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span>
+                        INSPECTION MANAGEMENT
+                    </span>
+
+                    <h2>
+                        Customer Bookings
+                    </h2>
+
+                </div>
+
+                <button
+                    onclick="loadBookings()"
+                    class="refresh-btn"
+                >
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div id="bookingTable">
+
+                    <div class="loading">
+                        Loading bookings...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             PURCHASE REQUESTS
+        ========================================== -->
+
+        <section
+            id="requests"
+            class="section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span>
+                        SALES MANAGEMENT
+                    </span>
+
+                    <h2>
+                        Purchase Requests
+                    </h2>
+
+                </div>
+
+                <button
+                    onclick="loadRequests()"
+                    class="refresh-btn"
+                >
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div id="requestTable">
+
+                    <div class="loading">
+                        Loading requests...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             CUSTOMERS
+        ========================================== -->
+
+        <section
+            id="customers"
+            class="section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span>
+                        CUSTOMER MANAGEMENT
+                    </span>
+
+                    <h2>
+                        Registered Customers
+                    </h2>
+
+                </div>
+
+                <button
+                    onclick="loadCustomers()"
+                    class="refresh-btn"
+                >
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div id="customerTable">
+
+                    <div class="loading">
+                        Loading customers...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             CARS
+        ========================================== -->
+
+        <section
+            id="cars"
+            class="section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span>
+                        VEHICLE MANAGEMENT
+                    </span>
+
+                    <h2>
+                        Car Inventory
+                    </h2>
+
+                </div>
+
+                <div>
+
+                    <button
+                        onclick="openCarModal()"
+                        class="add-btn"
+                    >
+                        + Add New Car
+                    </button>
+
+                    <button
+                        onclick="loadCars()"
+                        class="refresh-btn"
+                    >
+                        ↻ Refresh
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div id="carTable">
+
+                    <div class="loading">
+                        Loading cars...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================================
+         CAR MODAL
+    ========================================== -->
+
+    <div
+        id="carModal"
+        class="modal"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span>
+                        VEHICLE MANAGEMENT
+                    </span>
+
+                    <h2 id="modalTitle">
+                        Add New Car
+                    </h2>
+
+                </div>
+
+                <button
+                    onclick="closeCarModal()"
+                    class="close-btn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="carForm">
+
+                <input
+                    type="hidden"
+                    id="carId"
+                >
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label>
+                            Brand
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carBrand"
+                            placeholder="BMW"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Model / Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carName"
+                            placeholder="BMW M5 Competition"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Price
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carPrice"
+                            placeholder="PKR 8.50 Crore"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Year
+                        </label>
+
+                        <input
+                            type="number"
+                            id="carYear"
+                            placeholder="2025"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Engine
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carEngine"
+                            placeholder="4.4L V8"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Power
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carPower"
+                            placeholder="617 HP"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Transmission
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carTransmission"
+                            placeholder="Automatic"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Fuel
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carFuel"
+                            placeholder="Petrol"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Body Type
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carBody"
+                            placeholder="Sedan"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Status
+                        </label>
+
+                        <select id="carStatus">
+
+                            <option value="Available">
+                                Available
+                            </option>
+
+                            <option value="Reserved">
+                                Reserved
+                            </option>
+
+                            <option value="Sold">
+                                Sold
+                            </option>
+
+                            <option value="Unavailable">
+                                Unavailable
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label>
+                            Image Path
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carImage"
+                            placeholder="images/car-10.jpg"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label>
+                            Description
+                        </label>
+
+                        <textarea
+                            id="carDescription"
+                            rows="4"
+                            placeholder="Enter vehicle description..."
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        onclick="closeCarModal()"
+                        class="cancel-btn"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
+                        Save Car
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+<!-- BOOKING DETAILS MODAL -->
+
+<div id="bookingModal" class="booking-modal">
+
+    <div class="booking-modal-box">
+
+        <div class="booking-modal-header">
+
+            <div>
+                <span>VELOCIA MOTORS</span>
+                <h2>Booking Details</h2>
+            </div>
+
+            <button
+                type="button"
+                class="booking-close-btn"
+                onclick="closeBookingModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="bookingModalContent"
+            class="booking-modal-content"
+        >
+        </div>
+
+    </div>
+
+</div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

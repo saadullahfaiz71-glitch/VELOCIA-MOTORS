@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VELOCIA MOTORS — Create Account</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(220, 38, 38, 0.15), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 35%),
+                #070b12;
+            color: #fff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px;
+        }
+
+        .register-wrapper {
+            width: 100%;
+            max-width: 470px;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-main {
+            display: block;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 5px;
+        }
+
+        .brand-sub {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            letter-spacing: 6px;
+            color: #9ca3af;
+        }
+
+        .register-card {
+            background: rgba(17, 24, 39, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 24px;
+            padding: 38px;
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.55),
+                0 0 40px rgba(220, 38, 38, 0.05);
+
+            backdrop-filter: blur(18px);
+        }
+
+        .heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .heading h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 19px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d1d5db;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px;
+
+            background: #0b1220;
+            border: 1px solid #273244;
+            border-radius: 12px;
+
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+
+            transition: 0.25s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+        }
+
+        .password-input {
+            padding-right: 50px !important;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            border: none;
+            background: transparent;
+            color: #9ca3af;
+
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .toggle-password:hover {
+            color: #fff;
+        }
+
+        .register-btn {
+            width: 100%;
+            height: 54px;
+            margin-top: 8px;
+
+            border: none;
+            border-radius: 12px;
+
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: white;
+
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+
+            cursor: pointer;
+
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.22);
+            transition: 0.25s ease;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(220, 38, 38, 0.32);
+        }
+
+        .register-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            display: none;
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(22, 163, 74, 0.12);
+            border: 1px solid rgba(22, 163, 74, 0.35);
+            color: #86efac;
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(220, 38, 38, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            color: #fca5a5;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 24px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #f87171;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .login-link a:hover {
+            color: #fff;
+        }
+
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .back-home:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 18px;
+            }
+
+            .register-card {
+                padding: 26px 20px;
+            }
+
+            .brand-main {
+                font-size: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-wrapper">
+
+        <div class="brand">
+            <span class="brand-main">VELOCIA</span>
+            <span class="brand-sub">MOTORS</span>
+        </div>
+
+        <div class="register-card">
+
+            <div class="heading">
+                <h1>Create Account</h1>
+                <p>Join VELOCIA MOTORS and explore premium cars.</p>
+            </div>
+
+            <form id="registerForm">
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            class="password-input"
+                            placeholder="Minimum 6 characters"
+                            minlength="6"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            onclick="togglePassword('password', this)"
+                        >
+                            👁
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            class="password-input"
+                            placeholder="Enter password again"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            onclick="togglePassword('confirmPassword', this)"
+                        >
+                            👁
+                        </button>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    class="register-btn"
+                    id="registerBtn"
+                >
+                    CREATE ACCOUNT
+                </button>
+
+                <div id="message" class="message"></div>
+
+            </form>
+
+            <div class="login-link">
+                Already have an account?
+                <a href="login.html">Login</a>
+            </div>
+
+        </div>
+
+        <a href="index.html" class="back-home">
+            ← Back to VELOCIA MOTORS
+        </a>
+
+    </div>
+
+
+    <script>
+
+        // ==========================================
+        // PASSWORD SHOW / HIDE
+        // ==========================================
+
+        function togglePassword(inputId, button) {
+
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                button.textContent = "🙈";
+            } else {
+                input.type = "password";
+                button.textContent = "👁";
+            }
+        }
+
+
+        // ==========================================
+        // REGISTER
+        // ==========================================
+
+        const registerForm = document.getElementById("registerForm");
+
+        registerForm.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            const message = document.getElementById("message");
+            const registerBtn = document.getElementById("registerBtn");
+
+
+            message.className = "message";
+            message.textContent = "";
+
+
+            // Check password length
+            if (password.length < 6) {
+
+                message.className = "message error";
+                message.textContent =
+                    "Password must be at least 6 characters.";
+
+                return;
+            }
+
+
+            // Check matching passwords
+            if (password !== confirmPassword) {
+
+                message.className = "message error";
+                message.textContent =
+                    "Passwords do not match.";
+
+                return;
+            }
+
+
+            // Disable button
+            registerBtn.disabled = true;
+            registerBtn.textContent = "CREATING ACCOUNT...";
+
+
+            try {
+
+                const response = await fetch("/api/register", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
+
+
+                const data = await response.json();
+
+
+                if (data.success) {
+
+                    message.className = "message success";
+
+                    message.textContent =
+                        "Account created successfully! Redirecting to login...";
+
+
+                    registerForm.reset();
+
+
+                    setTimeout(function() {
+
+                        window.location.href = "login.html";
+
+                    }, 1800);
+
+
+                } else {
+
+                    message.className = "message error";
+
+                    message.textContent =
+                        data.message || "Registration failed.";
+
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = "CREATE ACCOUNT";
+                }
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.className = "message error";
+
+                message.textContent =
+                    "Unable to connect to server. Make sure the server is running.";
+
+                registerBtn.disabled = false;
+                registerBtn.textContent = "CREATE ACCOUNT";
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

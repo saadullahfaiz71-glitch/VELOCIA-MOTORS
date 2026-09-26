@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VELOCIA MOTORS — Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(220, 38, 38, 0.15),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom right,
+                    rgba(59, 130, 246, 0.12),
+                    transparent 35%
+                ),
+                #070b12;
+
+            color: #ffffff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 470px;
+        }
+
+        /* ==========================================
+           BRAND
+        ========================================== */
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-main {
+            display: block;
+
+            font-size: 32px;
+            font-weight: 900;
+
+            letter-spacing: 5px;
+        }
+
+        .brand-sub {
+            display: block;
+
+            margin-top: 4px;
+
+            font-size: 11px;
+            letter-spacing: 6px;
+
+            color: #9ca3af;
+        }
+
+        /* ==========================================
+           CARD
+        ========================================== */
+
+        .login-card {
+            background: rgba(17, 24, 39, 0.88);
+
+            border: 1px solid rgba(255, 255, 255, 0.10);
+
+            border-radius: 24px;
+
+            padding: 38px;
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.55),
+                0 0 40px rgba(220, 38, 38, 0.05);
+
+            backdrop-filter: blur(18px);
+        }
+
+        /* ==========================================
+           HEADING
+        ========================================== */
+
+        .heading {
+            text-align: center;
+
+            margin-bottom: 30px;
+        }
+
+        .heading h1 {
+            font-size: 28px;
+
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #9ca3af;
+
+            font-size: 14px;
+        }
+
+        /* ==========================================
+           FORM
+        ========================================== */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #d1d5db;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 52px;
+
+            padding: 0 16px;
+
+            background: #0b1220;
+
+            border: 1px solid #273244;
+
+            border-radius: 12px;
+
+            color: #ffffff;
+
+            outline: none;
+
+            font-size: 14px;
+
+            transition: 0.25s ease;
+        }
+
+        .form-group input::placeholder {
+            color: #6b7280;
+        }
+
+        .form-group input:focus {
+            border-color: #dc2626;
+
+            box-shadow:
+                0 0 0 3px rgba(220, 38, 38, 0.12);
+        }
+
+        .password-input {
+            padding-right: 52px !important;
+        }
+
+        /* ==========================================
+           PASSWORD BUTTON
+        ========================================== */
+
+        .toggle-password {
+            position: absolute;
+
+            right: 14px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 30px;
+            height: 30px;
+
+            border: none;
+
+            background: transparent;
+
+            color: #9ca3af;
+
+            cursor: pointer;
+
+            font-size: 17px;
+        }
+
+        .toggle-password:hover {
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           LOGIN BUTTON
+        ========================================== */
+
+        .login-btn {
+            width: 100%;
+            height: 54px;
+
+            margin-top: 5px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #dc2626,
+                    #991b1b
+                );
+
+            color: #ffffff;
+
+            font-size: 15px;
+            font-weight: 800;
+
+            letter-spacing: 0.5px;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 30px rgba(220, 38, 38, 0.22);
+
+            transition: 0.25s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 15px 35px rgba(220, 38, 38, 0.32);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.65;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+        /* ==========================================
+           MESSAGE
+        ========================================== */
+
+        .message {
+            display: none;
+
+            margin-top: 18px;
+
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            text-align: center;
+        }
+
+        .message.success {
+            display: block;
+
+            background: rgba(22, 163, 74, 0.12);
+
+            border: 1px solid rgba(22, 163, 74, 0.35);
+
+            color: #86efac;
+        }
+
+        .message.error {
+            display: block;
+
+            background: rgba(220, 38, 38, 0.12);
+
+            border: 1px solid rgba(220, 38, 38, 0.35);
+
+            color: #fca5a5;
+        }
+
+        /* ==========================================
+           REGISTER
+        ========================================== */
+
+        .register-link {
+            text-align: center;
+
+            margin-top: 25px;
+
+            color: #9ca3af;
+
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #f87171;
+
+            text-decoration: none;
+
+            font-weight: 700;
+        }
+
+        .register-link a:hover {
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           BACK HOME
+        ========================================== */
+
+        .back-home {
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #6b7280;
+
+            text-decoration: none;
+
+            font-size: 13px;
+        }
+
+        .back-home:hover {
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           MOBILE
+        ========================================== */
+
+        @media (max-width: 520px) {
+
+            body {
+                padding: 18px;
+            }
+
+            .login-card {
+                padding: 26px 20px;
+            }
+
+            .brand-main {
+                font-size: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+
+        <!-- BRAND -->
+        <div class="brand">
+
+            <span class="brand-main">
+                VELOCIA
+            </span>
+
+            <span class="brand-sub">
+                MOTORS
+            </span>
+
+        </div>
+
+
+        <!-- LOGIN CARD -->
+        <div class="login-card">
+
+            <div class="heading">
+
+                <h1>
+                    Welcome Back
+                </h1>
+
+                <p>
+                    Login to your VELOCIA MOTORS account.
+                </p>
+
+            </div>
+
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm">
+
+                <!-- EMAIL -->
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <input
+                            type="password"
+                            id="password"
+                            class="password-input"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            onclick="togglePassword()"
+                            aria-label="Show password"
+                        >
+                            👁
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOGIN BUTTON -->
+                <button
+                    type="submit"
+                    class="login-btn"
+                    id="loginBtn"
+                >
+                    LOGIN
+                </button>
+
+
+                <!-- MESSAGE -->
+                <div
+                    id="message"
+                    class="message"
+                ></div>
+
+            </form>
+
+
+            <!-- REGISTER -->
+            <div class="register-link">
+
+                Don't have an account?
+
+                <a href="register.html">
+                    Create Account
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- HOME -->
+        <a
+            href="index.html"
+            class="back-home"
+        >
+            ← Back to VELOCIA MOTORS
+        </a>
+
+    </div>
+
+
+    <script>
+
+        // ==========================================
+        // SHOW / HIDE PASSWORD
+        // ==========================================
+
+        function togglePassword() {
+
+            const password =
+                document.getElementById("password");
+
+            const button =
+                document.querySelector(".toggle-password");
+
+
+            if (password.type === "password") {
+
+                password.type = "text";
+
+                button.textContent = "🙈";
+
+            } else {
+
+                password.type = "password";
+
+                button.textContent = "👁";
+
+            }
+        }
+
+
+        // ==========================================
+        // LOGIN
+        // ==========================================
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+
+        loginForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const email =
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+
+                const message =
+                    document.getElementById("message");
+
+
+                const loginBtn =
+                    document.getElementById("loginBtn");
+
+
+                // Clear previous message
+
+                message.className = "message";
+
+                message.textContent = "";
+
+
+                // Disable button
+
+                loginBtn.disabled = true;
+
+                loginBtn.textContent =
+                    "LOGGING IN...";
+
+
+                try {
+
+                    const response =
+                        await fetch("/api/login", {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                email: email,
+
+                                password: password
+
+                            })
+
+                        });
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (data.success) {
+
+                        message.className =
+                            "message success";
+
+
+                        message.textContent =
+                            "Login successful!";
+
+
+                        /*
+                         * Save logged-in user
+                         * temporarily in browser.
+                         */
+
+                        localStorage.setItem(
+                            "velociaUser",
+                            JSON.stringify(data.user)
+                        );
+
+
+                        /*
+                         * Redirect according
+                         * to user role.
+                         */
+
+                        setTimeout(function() {
+
+                            if (data.user.role === "admin") {
+
+                                window.location.href =
+                                    "admin/index.html";
+
+                            } else if (
+                                data.user.role === "worker"
+                            ) {
+
+                                window.location.href =
+                                    "worker/index.html";
+
+                            } else {
+
+                                window.location.href =
+                                    "customer/index.html";
+
+                            }
+
+                        }, 800);
+
+                    } else {
+
+                        message.className =
+                            "message error";
+
+
+                        message.textContent =
+                            data.message ||
+                            "Invalid email or password.";
+
+
+                        loginBtn.disabled = false;
+
+                        loginBtn.textContent =
+                            "LOGIN";
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Login error:",
+                        error
+                    );
+
+
+                    message.className =
+                        "message error";
+
+
+                    message.textContent =
+                        "Unable to connect to server. Make sure the server is running.";
+
+
+                    loginBtn.disabled = false;
+
+                    loginBtn.textContent =
+                        "LOGIN";
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
