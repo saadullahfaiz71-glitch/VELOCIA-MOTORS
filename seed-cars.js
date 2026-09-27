@@ -14,7 +14,6 @@ const cars = [
         image: "images/car-1.jpg",
         description: "A high-performance BMW combining luxury, advanced technology and powerful driving performance."
     },
-
     {
         brand: "Mercedes",
         name: "Mercedes-AMG GT",
@@ -28,7 +27,6 @@ const cars = [
         image: "images/car-2.jpg",
         description: "A premium performance coupe with aggressive styling, luxury interior and advanced technology."
     },
-
     {
         brand: "Porsche",
         name: "Porsche 911 Carrera",
@@ -42,7 +40,6 @@ const cars = [
         image: "images/car-3.jpg",
         description: "An iconic sports car offering precision handling, premium comfort and exciting performance."
     },
-
     {
         brand: "Toyota",
         name: "Toyota Corolla Grande",
@@ -56,7 +53,6 @@ const cars = [
         image: "images/car-4.jpg",
         description: "A practical sedan combining comfort, modern technology and everyday usability."
     },
-
     {
         brand: "Honda",
         name: "Honda Civic RS",
@@ -70,7 +66,6 @@ const cars = [
         image: "images/car-5.jpg",
         description: "A modern sedan with sporty styling, comfortable interior and useful technology."
     },
-
     {
         brand: "KIA",
         name: "KIA Sportage",
@@ -84,7 +79,6 @@ const cars = [
         image: "images/car-6.jpg",
         description: "A modern SUV designed for comfort, practicality and everyday driving."
     },
-
     {
         brand: "Hyundai",
         name: "Hyundai Tucson",
@@ -98,7 +92,6 @@ const cars = [
         image: "images/car-7.jpg",
         description: "A stylish SUV with modern technology, spacious comfort and practical features."
     },
-
     {
         brand: "Audi",
         name: "Audi A6",
@@ -112,7 +105,6 @@ const cars = [
         image: "images/car-8.jpg",
         description: "A premium executive sedan focused on luxury, technology and refined performance."
     },
-
     {
         brand: "BMW",
         name: "BMW 3 Series",
@@ -137,11 +129,13 @@ const existingCars = db
     .get();
 
 if (existingCars.count > 0) {
+
     console.log("");
     console.log("======================================");
     console.log("Cars already exist in database.");
     console.log("Skipping car seed to avoid duplicates.");
     console.log("======================================");
+
     db.close();
     process.exit(0);
 }
@@ -169,7 +163,6 @@ const insert = db.prepare(`
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Available')
 `);
 
-
 const insertMany = db.transaction((cars) => {
 
     for (const car of cars) {
@@ -192,9 +185,7 @@ const insertMany = db.transaction((cars) => {
 
 });
 
-
 insertMany(cars);
-
 
 // ==========================================
 // SHOW RESULT
@@ -212,7 +203,6 @@ const result = db
     `)
     .all();
 
-
 console.log("");
 console.log("======================================");
 console.log("     VELOCIA MOTORS CAR DATABASE");
@@ -223,3 +213,5 @@ console.table(result);
 console.log("======================================");
 console.log(`${result.length} cars inserted successfully!`);
 console.log("======================================");
+
+db.close();
