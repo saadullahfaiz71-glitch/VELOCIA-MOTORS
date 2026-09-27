@@ -4,7 +4,7 @@
   "description": "VELOCIA MOTORS - Premium Car Marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node seed-cars.js && node server.js"
+    "start": "node seed-cars.js && node seed-quiz.js && node server.js"
   },
   "keywords": [
     "cars",
