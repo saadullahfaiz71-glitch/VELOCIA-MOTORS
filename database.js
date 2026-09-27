@@ -67,7 +67,31 @@ db.exec(`
             ON DELETE CASCADE
     );
 `);
+// ===============================
+// QUIZ RESULTS TABLE
+// ===============================
+db.exec(`
+    CREATE TABLE IF NOT EXISTS quiz_results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        car_id INTEGER NOT NULL,
+        total_questions INTEGER NOT NULL,
+        correct_answers INTEGER NOT NULL,
+        wrong_answers INTEGER NOT NULL,
+        score INTEGER NOT NULL,
+        result_data TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        preference TEXT,
 
+        FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE,
+
+        FOREIGN KEY (car_id)
+            REFERENCES cars(id)
+            ON DELETE CASCADE
+    );
+`);
 
 // ===============================
 // PURCHASE REQUESTS TABLE
