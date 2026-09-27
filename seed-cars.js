@@ -128,6 +128,23 @@ const cars = [
     }
 ];
 
+// ==========================================
+// CHECK IF CARS ALREADY EXIST
+// ==========================================
+
+const existingCars = db
+    .prepare("SELECT COUNT(*) AS count FROM cars")
+    .get();
+
+if (existingCars.count > 0) {
+    console.log("");
+    console.log("======================================");
+    console.log("Cars already exist in database.");
+    console.log("Skipping car seed to avoid duplicates.");
+    console.log("======================================");
+    db.close();
+    process.exit(0);
+}
 
 // ==========================================
 // INSERT CARS
