@@ -67,6 +67,44 @@ db.exec(`
             ON DELETE CASCADE
     );
 `);
+// users table
+// cars table
+// bookings table
+
+// 👇 YAHAN QUIZ QUESTIONS TABLE
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS quiz_questions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        question TEXT NOT NULL,
+        option_a TEXT NOT NULL,
+        option_b TEXT NOT NULL,
+        option_c TEXT NOT NULL,
+        option_d TEXT NOT NULL,
+        correct_answer TEXT NOT NULL,
+        category TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+`);
+
+// 👇 PHIR quiz_results
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS quiz_results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        car_id INTEGER NOT NULL,
+        total_questions INTEGER NOT NULL,
+        correct_answers INTEGER NOT NULL,
+        wrong_answers INTEGER NOT NULL,
+        score INTEGER NOT NULL,
+        result_data TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        preference TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+    );
+`);
 // ===============================
 // QUIZ RESULTS TABLE
 // ===============================
