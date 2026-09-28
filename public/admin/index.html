@@ -698,26 +698,30 @@
                             Status
                         </label>
 
-                        <select id="carStatus">
+                        
+                    <select id="carStatus">
 
-                            <option value="Available">
-                                Available
-                            </option>
+                    <option value="Available">
+                         Available
+                     </option>
 
-                            <option value="Reserved">
-                                Reserved
-                            </option>
+                     <option value="Coming Soon">
+                        Coming Soon
+                     </option>
 
-                            <option value="Sold">
-                                Sold
-                            </option>
+                    <option value="Reserved">
+                         Reserved
+                     </option>
 
-                            <option value="Unavailable">
-                                Unavailable
-                            </option>
+                    <option value="Sold">
+                        Sold
+                    </option>
 
-                        </select>
+                     <option value="Unavailable">
+                        Unavailable
+                    </option>
 
+                    </select>   
                     </div>
 
 
@@ -810,9 +814,74 @@
     </div>
 
 </div>
+<script>
+    // ==========================================
+    // ADMIN ACCESS GUARD
+    // ==========================================
 
-    <script src="script.js"></script>
+    let adminUser = null;
+
+    try {
+        const savedUser =
+            localStorage.getItem("velociaUser");
+
+        if (savedUser) {
+            adminUser = JSON.parse(savedUser);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Invalid admin session:",
+            error
+        );
+
+        localStorage.removeItem("velociaUser");
+
+        adminUser = null;
+    }
+
+
+    // ==========================================
+    // ONLY ADMIN CAN ENTER ADMIN DASHBOARD
+    // ==========================================
+
+    if (
+        !adminUser ||
+        !adminUser.id ||
+        adminUser.role !== "admin"
+    ) {
+
+        localStorage.removeItem("velociaUser");
+
+        window.location.replace("../login.html");
+
+    }
+
+
+    // ==========================================
+    // SHOW REAL ADMIN NAME
+    // ==========================================
+
+    if (adminUser) {
+
+        const adminNameElements =
+            document.querySelectorAll(
+                ".admin-profile strong"
+            );
+
+        adminNameElements.forEach(element => {
+
+            element.textContent =
+                adminUser.name || "Administrator";
+
+        });
+
+    }
+</script>
+
+
+<script src="script.js"></script>
 
 </body>
-
 </html>

@@ -1,20 +1,67 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const session = require("express-session");
 const db = require("./database");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// DATABASE MIGRATIONS
+// ==========================================
+
+function addColumnIfMissing(table, column, definition) {
+    const columns = db.prepare(`PRAGMA table_info(${table})`).all();
+
+    const exists = columns.some(col => col.name === column);
+
+    if (!exists) {
+        db.prepare(
+            `ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`
+        ).run();
+
+        console.log(`Database migration: ${table}.${column} added`);
+    }
+}
+
+// Purchase Requests migration
+addColumnIfMissing(
+    "purchase_requests",
+    "quiz_result_id",
+    "INTEGER"
+);
 
 // ==========================================
 // MIDDLEWARE
 // ==========================================
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ==========================================
+// SESSION AUTHENTICATION
+// ==========================================
+
+app.use(
+    session({
+        secret:
+            process.env.SESSION_SECRET ||
+            "velocia-motors-change-this-secret",
+
+        resave: false,
+
+        saveUninitialized: false,
+
+        cookie: {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 1000 * 60 * 60 * 24
+        }
+    })
+);
+
 // Serve files from public folder
 app.use(express.static("public"));
-
 
 // ==========================================
 // TEST ROUTE
@@ -100,7 +147,6 @@ app.post("/api/register", async (req, res) => {
     }
 });
 
-
 // ==========================================
 // LOGIN
 // ==========================================
@@ -150,6 +196,21 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
+        // ==========================================
+        // CREATE SERVER-SIDE SESSION
+        // ==========================================
+
+        req.session.user = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        };
+
+        // ==========================================
+        // LOGIN SUCCESS RESPONSE
+        // ==========================================
+
         res.json({
             success: true,
             message: "Login successful!",
@@ -171,8 +232,151 @@ app.post("/api/login", async (req, res) => {
         });
     }
 });
+// ==========================================
+// ADMIN AUTHENTICATION
+// ==========================================
 
+function requireAdmin(req, res, next) {
 
+    try {
+
+        const sessionUser = req.session.user;
+
+        // User login nahi hai
+        if (!sessionUser) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login first."
+            });
+        }
+
+        // Admin nahi hai
+        if (String(sessionUser.role).toLowerCase() !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required."
+            });
+        }
+
+        // Database mein user verify karo
+        const currentUser = db
+            .prepare(`
+                SELECT
+                    id,
+                    name,
+                    email,
+                    role
+                FROM users
+                WHERE id = ?
+            `)
+            .get(sessionUser.id);
+
+        if (!currentUser) {
+
+            req.session.destroy(() => {});
+
+            return res.status(401).json({
+                success: false,
+                message: "User account not found."
+            });
+        }
+
+        // Database role bhi check karo
+        if (String(currentUser.role).toLowerCase() !== "admin") {
+
+            req.session.destroy(() => {});
+
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required."
+            });
+        }
+
+        // Verified admin
+        req.admin = currentUser;
+
+        next();
+
+    } catch (error) {
+
+        console.error("ADMIN AUTH ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Authentication error."
+        });
+    }
+}
+// ==========================================
+// ADMIN AUTHENTICATION
+// ==========================================
+
+function requireAdmin(req, res, next) {
+
+    try {
+
+        const sessionUser = req.session.user;
+
+        if (!sessionUser) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login first."
+            });
+        }
+
+        if (String(sessionUser.role).toLowerCase() !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required."
+            });
+        }
+
+        const currentUser = db
+            .prepare(`
+                SELECT
+                    id,
+                    name,
+                    email,
+                    role
+                FROM users
+                WHERE id = ?
+            `)
+            .get(sessionUser.id);
+
+        if (!currentUser) {
+
+            req.session.destroy(() => {});
+
+            return res.status(401).json({
+                success: false,
+                message: "User account not found."
+            });
+        }
+
+        if (String(currentUser.role).toLowerCase() !== "admin") {
+
+            req.session.destroy(() => {});
+
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required."
+            });
+        }
+
+        req.admin = currentUser;
+
+        next();
+
+    } catch (error) {
+
+        console.error("ADMIN AUTH ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Authentication error."
+        });
+    }
+}
 // ==========================================
 // GET ALL CARS
 // ==========================================
@@ -600,13 +804,74 @@ app.get("/api/purchase-requests/user/:userId", (req, res) => {
             error: error.message
         });
     }
-});
+});// ==========================================
+// ADMIN AUTHORIZATION
+// ==========================================
 
+function requireAdmin(req, res, next) {
+
+    try {
+
+        const user = req.session.user;
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login first."
+            });
+        }
+
+        if (String(user.role).toLowerCase() !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required."
+            });
+        }
+
+        // Verify current role directly from database
+        const currentUser = db.prepare(`
+            SELECT id, name, email, role
+            FROM users
+            WHERE id = ?
+        `).get(user.id);
+
+        if (!currentUser) {
+            req.session.destroy(() => {});
+            
+            return res.status(401).json({
+                success: false,
+                message: "User account not found."
+            });
+        }
+
+        if (String(currentUser.role).toLowerCase() !== "admin") {
+            req.session.destroy(() => {});
+
+            return res.status(403).json({
+                success: false,
+                message: "Admin access required."
+            });
+        }
+
+        req.admin = currentUser;
+
+        next();
+
+    } catch (error) {
+
+        console.error("ADMIN AUTH ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Authentication error."
+        });
+    }
+}
 // ==========================================
 // ADMIN - ALL BOOKINGS
 // ==========================================
 
-app.get("/api/admin/bookings", (req, res) => {
+app.get("/api/admin/bookings", requireAdmin, (req, res) => {
 
     try {
 
@@ -660,7 +925,7 @@ app.get("/api/admin/bookings", (req, res) => {
 // ADMIN - UPDATE BOOKING STATUS
 // ==========================================
 
-app.put("/api/admin/bookings/:id/status", (req, res) => {
+app.put("/api/admin/bookings/:id/status", requireAdmin, (req, res) => {
 
     try {
 
@@ -728,7 +993,7 @@ app.put("/api/admin/bookings/:id/status", (req, res) => {
 // ADMIN - ALL PURCHASE REQUESTS + QUIZ
 // ==========================================
 
-app.get("/api/admin/purchase-requests", (req, res) => {
+app.get("/api/admin/purchase-requests", requireAdmin, (req, res) => {
     try {
 
         const requests = db.prepare(`
@@ -796,7 +1061,41 @@ app.get("/api/admin/purchase-requests", (req, res) => {
 // =========================================================
 
 // GET ALL CARS FOR ADMIN
-app.get("/api/admin/cars", (req, res) => {
+app.get("/api/admin/cars", requireAdmin, (req, res) => {
+
+    try {
+
+        const cars = db.prepare(`
+            SELECT *
+            FROM cars
+            ORDER BY id DESC
+        `).all();
+
+        res.json({
+            success: true,
+            cars: cars
+        });
+
+    } catch (error) {
+
+        console.error("ADMIN CARS ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Unable to load cars."
+        });
+    }
+});
+
+// =========================================================
+// ADMIN — CAR MANAGEMENT
+// =========================================================
+
+// =========================================================
+// GET ALL CARS
+// =========================================================
+
+app.get("/api/admin/cars", requireAdmin, (req, res) => {
 
     try {
 
@@ -827,7 +1126,7 @@ app.get("/api/admin/cars", (req, res) => {
 // ADD NEW CAR
 // =========================================================
 
-app.post("/api/admin/cars", (req, res) => {
+app.post("/api/admin/cars", requireAdmin, (req, res) => {
 
     try {
 
@@ -852,7 +1151,6 @@ app.post("/api/admin/cars", (req, res) => {
                 success: false,
                 message: "Brand, car name and price are required."
             });
-
         }
 
         const result = db.prepare(`
@@ -870,7 +1168,6 @@ app.post("/api/admin/cars", (req, res) => {
                 description,
                 status
             )
-
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             brand,
@@ -915,7 +1212,7 @@ app.post("/api/admin/cars", (req, res) => {
 // UPDATE CAR
 // =========================================================
 
-app.put("/api/admin/cars/:id", (req, res) => {
+app.put("/api/admin/cars/:id", requireAdmin, (req, res) => {
 
     try {
 
@@ -946,7 +1243,6 @@ app.put("/api/admin/cars/:id", (req, res) => {
                 success: false,
                 message: "Car not found."
             });
-
         }
 
         if (!brand || !name || !price) {
@@ -955,12 +1251,10 @@ app.put("/api/admin/cars/:id", (req, res) => {
                 success: false,
                 message: "Brand, car name and price are required."
             });
-
         }
 
         db.prepare(`
             UPDATE cars
-
             SET
                 brand = ?,
                 name = ?,
@@ -974,7 +1268,6 @@ app.put("/api/admin/cars/:id", (req, res) => {
                 image = ?,
                 description = ?,
                 status = ?
-
             WHERE id = ?
         `).run(
             brand,
@@ -1020,7 +1313,7 @@ app.put("/api/admin/cars/:id", (req, res) => {
 // DELETE CAR
 // =========================================================
 
-app.delete("/api/admin/cars/:id", (req, res) => {
+app.delete("/api/admin/cars/:id", requireAdmin, (req, res) => {
 
     try {
 
@@ -1036,7 +1329,6 @@ app.delete("/api/admin/cars/:id", (req, res) => {
                 success: false,
                 message: "Car not found."
             });
-
         }
 
         db.prepare(`
@@ -1056,290 +1348,6 @@ app.delete("/api/admin/cars/:id", (req, res) => {
         res.status(500).json({
             success: false,
             message: "Unable to delete car."
-        });
-    }
-});
-
-// =========================================================
-// ADMIN — CAR MANAGEMENT
-// =========================================================
-
-// GET ALL CARS
-app.get("/api/admin/cars", (req, res) => {
-
-    try {
-
-        const cars = db.prepare(`
-            SELECT *
-            FROM cars
-            ORDER BY id DESC
-        `).all();
-
-        res.json({
-            success: true,
-            cars: cars
-        });
-
-    } catch (error) {
-
-        console.error("ADMIN CARS ERROR:", error);
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to load cars.",
-            error: error.message
-        });
-    }
-});
-
-
-// ADD NEW CAR
-app.post("/api/admin/cars", (req, res) => {
-
-    try {
-
-        const {
-            brand,
-            name,
-            price,
-            year,
-            engine,
-            power,
-            transmission,
-            fuel,
-            body_type,
-            image,
-            description,
-            status
-        } = req.body;
-
-
-        if (!brand || !name || !price) {
-
-            return res.status(400).json({
-                success: false,
-                message: "Brand, car name and price are required."
-            });
-        }
-
-
-        const result = db.prepare(`
-            INSERT INTO cars (
-                brand,
-                name,
-                price,
-                year,
-                engine,
-                power,
-                transmission,
-                fuel,
-                body_type,
-                image,
-                description,
-                status
-            )
-
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-
-            brand,
-            name,
-            price,
-            year || null,
-            engine || "",
-            power || "",
-            transmission || "",
-            fuel || "",
-            body_type || "",
-            image || "",
-            description || "",
-            status || "Available"
-
-        );
-
-
-        const newCar =
-            db.prepare(`
-                SELECT *
-                FROM cars
-                WHERE id = ?
-            `).get(result.lastInsertRowid);
-
-
-        res.json({
-            success: true,
-            message: "Car added successfully.",
-            car: newCar
-        });
-
-
-    } catch (error) {
-
-        console.error("ADD CAR ERROR:", error);
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to add car.",
-            error: error.message
-        });
-    }
-});
-
-
-// UPDATE CAR
-app.put("/api/admin/cars/:id", (req, res) => {
-
-    try {
-
-        const {
-            brand,
-            name,
-            price,
-            year,
-            engine,
-            power,
-            transmission,
-            fuel,
-            body_type,
-            image,
-            description,
-            status
-        } = req.body;
-
-
-        const car =
-            db.prepare(`
-                SELECT id
-                FROM cars
-                WHERE id = ?
-            `).get(req.params.id);
-
-
-        if (!car) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Car not found."
-            });
-        }
-
-
-        if (!brand || !name || !price) {
-
-            return res.status(400).json({
-                success: false,
-                message: "Brand, car name and price are required."
-            });
-        }
-
-
-        db.prepare(`
-            UPDATE cars
-
-            SET
-                brand = ?,
-                name = ?,
-                price = ?,
-                year = ?,
-                engine = ?,
-                power = ?,
-                transmission = ?,
-                fuel = ?,
-                body_type = ?,
-                image = ?,
-                description = ?,
-                status = ?
-
-            WHERE id = ?
-        `).run(
-
-            brand,
-            name,
-            price,
-            year || null,
-            engine || "",
-            power || "",
-            transmission || "",
-            fuel || "",
-            body_type || "",
-            image || "",
-            description || "",
-            status || "Available",
-            req.params.id
-
-        );
-
-
-        const updatedCar =
-            db.prepare(`
-                SELECT *
-                FROM cars
-                WHERE id = ?
-            `).get(req.params.id);
-
-
-        res.json({
-            success: true,
-            message: "Car updated successfully.",
-            car: updatedCar
-        });
-
-
-    } catch (error) {
-
-        console.error("UPDATE CAR ERROR:", error);
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to update car.",
-            error: error.message
-        });
-    }
-});
-
-
-// DELETE CAR
-app.delete("/api/admin/cars/:id", (req, res) => {
-
-    try {
-
-        const car =
-            db.prepare(`
-                SELECT id
-                FROM cars
-                WHERE id = ?
-            `).get(req.params.id);
-
-
-        if (!car) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Car not found."
-            });
-        }
-
-
-        db.prepare(`
-            DELETE FROM cars
-            WHERE id = ?
-        `).run(req.params.id);
-
-
-        res.json({
-            success: true,
-            message: "Car deleted successfully."
-        });
-
-
-    } catch (error) {
-
-        console.error("DELETE CAR ERROR:", error);
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to delete car.",
-            error: error.message
         });
     }
 });

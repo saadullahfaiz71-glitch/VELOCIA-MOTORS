@@ -4,7 +4,7 @@
   "description": "VELOCIA MOTORS - Premium Car Marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node seed-cars.js && node seed-quiz.js && node server.js"
+    "start": "node seed-cars.js && node seed-quiz.js && node seed-admin.js && node server.js"
   },
   "keywords": [
     "cars",
@@ -17,6 +17,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.3",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
   }
 }
