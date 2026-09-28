@@ -1816,38 +1816,53 @@ if (!existingAdmin) {
 // ==========================================
 // START SERVER
 // ==========================================
+// ==========================================
+// START SERVER
+// ==========================================
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
+
     console.log("");
+
     console.log(
         "======================================"
     );
+
     console.log(
         "       VELOCIA MOTORS SERVER"
     );
+
     console.log(
         "======================================"
     );
+
     console.log(
-        `Server running at: http://localhost:${PORT}`
+        `Server running at: http://0.0.0.0:${PORT}`
     );
+
     console.log(
         "Database connected successfully."
     );
+
     console.log(
         "Cars API ready."
     );
+
     console.log(
         "Booking API ready."
     );
+
     console.log(
         "Purchase API ready."
     );
+
     console.log(
         "Authentication API ready."
     );
+
     console.log(
         "======================================"
     );
+
     console.log("");
 });
