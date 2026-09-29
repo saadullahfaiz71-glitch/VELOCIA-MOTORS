@@ -58,6 +58,14 @@
                  <span>🚘</span>
                  Cars
             </button>
+            <button
+                     class="nav-item"
+                     data-section="history"
+                     onclick="showSection('history')"
+>
+                     <span>◷</span>
+                     Processing History
+            </button>
         </nav>
 
         <div class="sidebar-bottom">
@@ -508,6 +516,69 @@
 
     </main>
 
+    <!-- =========================================
+     PROCESSING HISTORY
+========================================== -->
+
+<section
+    id="history"
+    class="section"
+>
+
+    <div class="section-heading">
+
+        <div>
+
+            <span>
+                ACTIVITY MANAGEMENT
+            </span>
+
+            <h2>
+                Processing History
+            </h2>
+
+        </div>
+
+        <button
+            onclick="loadProcessingHistory()"
+            class="refresh-btn"
+        >
+            ↻ Refresh
+        </button>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <span>
+                    VELOCIA MOTORS
+                </span>
+
+                <h3>
+                    Booking & Purchase Processing
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div id="processingHistoryTable">
+
+            <div class="loading">
+                Loading processing history...
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
 
     <!-- =========================================
          CAR MODAL
@@ -814,72 +885,6 @@
     </div>
 
 </div>
-<script>
-    // ==========================================
-    // ADMIN ACCESS GUARD
-    // ==========================================
-
-    let adminUser = null;
-
-    try {
-        const savedUser =
-            localStorage.getItem("velociaUser");
-
-        if (savedUser) {
-            adminUser = JSON.parse(savedUser);
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Invalid admin session:",
-            error
-        );
-
-        localStorage.removeItem("velociaUser");
-
-        adminUser = null;
-    }
-
-
-    // ==========================================
-    // ONLY ADMIN CAN ENTER ADMIN DASHBOARD
-    // ==========================================
-
-    if (
-        !adminUser ||
-        !adminUser.id ||
-        adminUser.role !== "admin"
-    ) {
-
-        localStorage.removeItem("velociaUser");
-
-        window.location.replace("../login.html");
-
-    }
-
-
-    // ==========================================
-    // SHOW REAL ADMIN NAME
-    // ==========================================
-
-    if (adminUser) {
-
-        const adminNameElements =
-            document.querySelectorAll(
-                ".admin-profile strong"
-            );
-
-        adminNameElements.forEach(element => {
-
-            element.textContent =
-                adminUser.name || "Administrator";
-
-        });
-
-    }
-</script>
-
 
 <script src="script.js"></script>
 
