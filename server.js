@@ -4,8 +4,29 @@ const session = require("express-session");
 const db = require("./database");
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
+app.set("trust proxy", 1);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "velocia-motors-change-this-secret",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 1000 * 60 * 60 * 24
+        }
+    })
+);
+
+app.use(express.static("public"));
 // ==========================================
 // DATABASE MIGRATIONS
 // ==========================================
@@ -1813,9 +1834,6 @@ if (!existingAdmin) {
 
     console.log("✅ Railway admin account ready.");
 }
-// ==========================================
-// START SERVER
-// ==========================================
 // ==========================================
 // START SERVER
 // ==========================================
