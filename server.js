@@ -2,20 +2,38 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
 const db = require("./database");
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+// ==========================================
+// TRUST PROXY
+// ==========================================
+
 app.set("trust proxy", 1);
+
+// ==========================================
+// BODY PARSING
+// ==========================================
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ==========================================
+// SESSION
+// ==========================================
+
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "velocia-motors-change-this-secret",
+        secret:
+            process.env.SESSION_SECRET ||
+            "velocia-motors-change-this-secret",
+
         resave: false,
+
         saveUninitialized: false,
+
         cookie: {
             httpOnly: true,
             sameSite: "lax",
@@ -25,7 +43,12 @@ app.use(
     })
 );
 
+// ==========================================
+// STATIC FILES
+// ==========================================
+
 app.use(express.static("public"));
+
 // ==========================================
 // DATABASE MIGRATIONS
 // ==========================================
@@ -55,46 +78,6 @@ addColumnIfMissing(
     "quiz_result_id",
     "INTEGER"
 );
-
-// ==========================================
-// MIDDLEWARE
-// ==========================================
-
-app.use(express.json());
-app.use(
-    express.urlencoded({
-        extended: true
-    })
-);
-
-// ==========================================
-// SESSION AUTHENTICATION
-// ==========================================
-
-app.use(
-    session({
-        secret:
-            process.env.SESSION_SECRET ||
-            "velocia-motors-change-this-secret",
-
-        resave: false,
-
-        saveUninitialized: false,
-
-        cookie: {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
-            maxAge: 1000 * 60 * 60 * 24
-        }
-    })
-);
-
-// ==========================================
-// STATIC FILES
-// ==========================================
-
-app.use(express.static("public"));
 
 // ==========================================
 // AUTH HELPERS
@@ -147,6 +130,10 @@ function requireLogin(req, res, next) {
     }
 }
 
+// ==========================================
+// ADMIN AUTH
+// ==========================================
+
 function requireAdmin(req, res, next) {
     try {
         if (!req.session.user) {
@@ -188,6 +175,7 @@ function requireAdmin(req, res, next) {
         }
 
         req.admin = currentUser;
+        req.currentUser = currentUser;
 
         next();
 
@@ -205,7 +193,7 @@ function requireAdmin(req, res, next) {
 }
 
 // ==========================================
-// TEST ROUTES
+// TEST
 // ==========================================
 
 app.get("/api/test", (req, res) => {
@@ -361,22 +349,53 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
-        req.session.user = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role
-        };
+        // Clear old session data
+        req.session.regenerate(error => {
+            if (error) {
+                console.error(
+                    "SESSION REGENERATE ERROR:",
+                    error
+                );
 
-        res.json({
-            success: true,
-            message: "Login successful!",
-            user: {
+                return res.status(500).json({
+                    success: false,
+                    message:
+                        "Unable to create login session."
+                });
+            }
+
+            req.session.user = {
                 id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role
-            }
+            };
+
+            req.session.save(saveError => {
+                if (saveError) {
+                    console.error(
+                        "SESSION SAVE ERROR:",
+                        saveError
+                    );
+
+                    return res.status(500).json({
+                        success: false,
+                        message:
+                            "Unable to save login session."
+                    });
+                }
+
+                res.json({
+                    success: true,
+                    message: "Login successful!",
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role
+                    }
+                });
+            });
         });
 
     } catch (error) {
@@ -400,7 +419,6 @@ app.post("/api/login", async (req, res) => {
 app.get(
     "/api/me",
     requireLogin,
-    requireAdmin,
     (req, res) => {
         res.json({
             success: true,
@@ -512,13 +530,12 @@ app.get("/api/cars/:id", (req, res) => {
 });
 
 // ==========================================
-// CREATE BOOKING
+// CREATE BOOKING — CUSTOMER
 // ==========================================
 
 app.post(
     "/api/bookings",
     requireLogin,
-    requireAdmin,
     (req, res) => {
         try {
             const {
@@ -610,7 +627,6 @@ app.post(
 app.get(
     "/api/bookings/user/:userId",
     requireLogin,
-    requireAdmin,
     (req, res) => {
         try {
             const requestedUserId =
@@ -674,13 +690,12 @@ app.get(
 );
 
 // ==========================================
-// CREATE PURCHASE REQUEST
+// CREATE PURCHASE REQUEST — CUSTOMER
 // ==========================================
 
 app.post(
     "/api/purchase-requests",
     requireLogin,
-    requireAdmin,
     (req, res) => {
         try {
             const {
@@ -836,7 +851,6 @@ app.post(
 app.get(
     "/api/purchase-requests/user/:userId",
     requireLogin,
-    requireAdmin,
     (req, res) => {
         try {
             const requestedUserId =
@@ -920,7 +934,6 @@ app.get(
 
 app.get(
     "/api/admin/bookings",
-    requireLogin,
     requireAdmin,
     (req, res) => {
         try {
@@ -981,7 +994,6 @@ app.get(
 
 app.put(
     "/api/admin/bookings/:id/status",
-    requireLogin,
     requireAdmin,
     (req, res) => {
         try {
@@ -1057,8 +1069,6 @@ app.put(
 app.get(
     "/api/admin/purchase-requests",
     requireAdmin,
-    requireLogin,
-    
     (req, res) => {
         try {
             const requests = db
@@ -1141,8 +1151,6 @@ app.get(
 app.get(
     "/api/admin/users",
     requireAdmin,
-    requireLogin,
-    
     (req, res) => {
         try {
             const users = db
@@ -1187,8 +1195,6 @@ app.get(
 app.get(
     "/api/admin/cars",
     requireAdmin,
-    requireLogin,
-    
     (req, res) => {
         try {
             const cars = db
@@ -1226,8 +1232,6 @@ app.get(
 app.post(
     "/api/admin/cars",
     requireAdmin,
-    requireLogin,
-    
     (req, res) => {
         try {
             const {
@@ -1331,8 +1335,6 @@ app.post(
 app.put(
     "/api/admin/cars/:id",
     requireAdmin,
-    requireLogin,
-    
     (req, res) => {
         try {
             const {
@@ -1447,7 +1449,6 @@ app.put(
 app.delete(
     "/api/admin/cars/:id",
     requireAdmin,
-    requireLogin,
     (req, res) => {
         try {
             const car = db
@@ -1537,13 +1538,12 @@ app.get(
 );
 
 // ==========================================
-// QUIZ — SAVE RESULT
+// QUIZ — SAVE RESULT — CUSTOMER
 // ==========================================
 
 app.post(
     "/api/quiz/results",
     requireLogin,
-    requireAdmin,
     (req, res) => {
         try {
             const {
@@ -1821,15 +1821,26 @@ app.post(
         }
     }
 );
+
+// ==========================================
+// ADMIN ACCOUNT
+// ==========================================
+
 const adminEmail = "admin@velocia.com";
 const adminPassword = "Admin@12345";
 
 const existingAdmin = db
-    .prepare("SELECT id FROM users WHERE email = ?")
+    .prepare(
+        "SELECT id FROM users WHERE email = ?"
+    )
     .get(adminEmail);
 
 if (!existingAdmin) {
-    const passwordHash = bcrypt.hashSync(adminPassword, 10);
+    const passwordHash =
+        bcrypt.hashSync(
+            adminPassword,
+            10
+        );
 
     db.prepare(`
         INSERT INTO users
@@ -1842,63 +1853,76 @@ if (!existingAdmin) {
         "admin"
     );
 
-    console.log("✅ Railway admin account created.");
+    console.log(
+        "Admin account created."
+    );
+
 } else {
     db.prepare(`
         UPDATE users
         SET role = ?
         WHERE email = ?
-    `).run("admin", adminEmail);
+    `).run(
+        "admin",
+        adminEmail
+    );
 
-    console.log("✅ Railway admin account ready.");
+    console.log(
+        "Admin account ready."
+    );
 }
+
 // ==========================================
 // START SERVER
 // ==========================================
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
 
-    console.log("");
+        console.log("");
 
-    console.log(
-        "======================================"
-    );
+        console.log(
+            "======================================"
+        );
 
-    console.log(
-        "       VELOCIA MOTORS SERVER"
-    );
+        console.log(
+            "       VELOCIA MOTORS SERVER"
+        );
 
-    console.log(
-        "======================================"
-    );
+        console.log(
+            "======================================"
+        );
 
-    console.log(
-        `Server running at: http://0.0.0.0:${PORT}`
-    );
+        console.log(
+            `Server running at: http://0.0.0.0:${PORT}`
+        );
 
-    console.log(
-        "Database connected successfully."
-    );
+        console.log(
+            "Database connected successfully."
+        );
 
-    console.log(
-        "Cars API ready."
-    );
+        console.log(
+            "Cars API ready."
+        );
 
-    console.log(
-        "Booking API ready."
-    );
+        console.log(
+            "Booking API ready."
+        );
 
-    console.log(
-        "Purchase API ready."
-    );
+        console.log(
+            "Purchase API ready."
+        );
 
-    console.log(
-        "Authentication API ready."
-    );
+        console.log(
+            "Authentication API ready."
+        );
 
-    console.log(
-        "======================================"
-    );
+        console.log(
+            "======================================"
+        );
 
-    console.log("");
-});
+        console.log("");
+    }
+);
