@@ -2,7 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
 const db = require("./database");
-
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -401,6 +400,7 @@ app.post("/api/login", async (req, res) => {
 app.get(
     "/api/me",
     requireLogin,
+    requireAdmin,
     (req, res) => {
         res.json({
             success: true,
@@ -518,6 +518,7 @@ app.get("/api/cars/:id", (req, res) => {
 app.post(
     "/api/bookings",
     requireLogin,
+    requireAdmin,
     (req, res) => {
         try {
             const {
@@ -609,6 +610,7 @@ app.post(
 app.get(
     "/api/bookings/user/:userId",
     requireLogin,
+    requireAdmin,
     (req, res) => {
         try {
             const requestedUserId =
@@ -678,6 +680,7 @@ app.get(
 app.post(
     "/api/purchase-requests",
     requireLogin,
+    requireAdmin,
     (req, res) => {
         try {
             const {
@@ -833,6 +836,7 @@ app.post(
 app.get(
     "/api/purchase-requests/user/:userId",
     requireLogin,
+    requireAdmin,
     (req, res) => {
         try {
             const requestedUserId =
@@ -916,6 +920,7 @@ app.get(
 
 app.get(
     "/api/admin/bookings",
+    requireLogin,
     requireAdmin,
     (req, res) => {
         try {
@@ -976,6 +981,7 @@ app.get(
 
 app.put(
     "/api/admin/bookings/:id/status",
+    requireLogin,
     requireAdmin,
     (req, res) => {
         try {
@@ -1051,6 +1057,8 @@ app.put(
 app.get(
     "/api/admin/purchase-requests",
     requireAdmin,
+    requireLogin,
+    
     (req, res) => {
         try {
             const requests = db
@@ -1133,6 +1141,8 @@ app.get(
 app.get(
     "/api/admin/users",
     requireAdmin,
+    requireLogin,
+    
     (req, res) => {
         try {
             const users = db
@@ -1177,6 +1187,8 @@ app.get(
 app.get(
     "/api/admin/cars",
     requireAdmin,
+    requireLogin,
+    
     (req, res) => {
         try {
             const cars = db
@@ -1214,6 +1226,8 @@ app.get(
 app.post(
     "/api/admin/cars",
     requireAdmin,
+    requireLogin,
+    
     (req, res) => {
         try {
             const {
@@ -1317,6 +1331,8 @@ app.post(
 app.put(
     "/api/admin/cars/:id",
     requireAdmin,
+    requireLogin,
+    
     (req, res) => {
         try {
             const {
@@ -1431,6 +1447,7 @@ app.put(
 app.delete(
     "/api/admin/cars/:id",
     requireAdmin,
+    requireLogin,
     (req, res) => {
         try {
             const car = db
@@ -1526,6 +1543,7 @@ app.get(
 app.post(
     "/api/quiz/results",
     requireLogin,
+    requireAdmin,
     (req, res) => {
         try {
             const {
