@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Contact | VELOCIA MOTORS</title>
 
     <style>
@@ -67,7 +68,7 @@
             font-size: 17px;
         }
 
-        /* CONTACT SECTION */
+        /* CONTACT */
         .contact-section {
             width: 85%;
             max-width: 1100px;
@@ -107,74 +108,63 @@
             line-height: 1.6;
         }
 
-        /* FORM */
-        form input,
-        form textarea {
-            width: 100%;
-            padding: 13px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        form input:focus,
-        form textarea:focus {
-            border-color: #e11d48;
-        }
-
-        textarea {
-            height: 130px;
-            resize: none;
-        }
-
-        .btn {
-            display: inline-block;
-            background: #e11d48;
-            color: white;
-            border: none;
-            padding: 13px 25px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 15px;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            background: #be123c;
-        }
-
-        /* SOCIAL LINKS */
+        /* CONTACT BUTTONS */
         .social {
             margin-top: 25px;
         }
 
         .social a {
-            display: inline-block;
+            display: block;
             text-decoration: none;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            padding: 10px 15px;
+            text-align: center;
+            margin-bottom: 12px;
+            padding: 13px 15px;
             border-radius: 6px;
             color: white;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: bold;
         }
 
         .whatsapp {
             background: #25D366;
         }
 
-        .instagram {
-            background: #d62976;
-        }
-
         .email {
             background: #333;
         }
 
+        .instagram {
+            background: #d62976;
+        }
+
         .social a:hover {
             opacity: 0.85;
+        }
+
+        /* MESSAGE BOX */
+        .message-box {
+            text-align: center;
+        }
+
+        .message-box p {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .message-box .btn {
+            display: block;
+            text-decoration: none;
+            background: #e11d48;
+            color: white;
+            padding: 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .message-box .btn:hover {
+            background: #be123c;
         }
 
         /* FOOTER */
@@ -192,6 +182,7 @@
 
         /* MOBILE */
         @media (max-width: 750px) {
+
             header {
                 flex-direction: column;
                 gap: 15px;
@@ -238,15 +229,20 @@
 
     <!-- HERO -->
     <section class="hero">
+
         <h1>Contact <span>VELOCIA</span></h1>
-        <p>Have a question? We'd love to hear from you.</p>
+
+        <p>
+            Have a question? Contact VELOCIA MOTORS today.
+        </p>
+
     </section>
 
 
     <!-- CONTACT CONTENT -->
     <section class="contact-section">
 
-        <!-- CONTACT INFORMATION -->
+        <!-- INFORMATION -->
         <div class="box">
 
             <h2>Get In <span>Touch</span></h2>
@@ -281,23 +277,24 @@
                 <p>Karachi, Pakistan</p>
             </div>
 
+            <!-- SOCIAL LINKS -->
             <div class="social">
 
                 <a class="whatsapp"
                    href="https://wa.me/923401376274"
                    target="_blank">
-                    WhatsApp
+                    💬 Contact on WhatsApp
                 </a>
 
                 <a class="email"
                    href="mailto:velociamotors@gmail.com">
-                    Email
+                    📧 Send Email
                 </a>
 
                 <a class="instagram"
                    href="https://www.instagram.com/velociamotors.pk/"
                    target="_blank">
-                    Instagram
+                    📸 Visit Instagram
                 </a>
 
             </div>
@@ -305,43 +302,32 @@
         </div>
 
 
-        <!-- MESSAGE FORM -->
-        <div class="box">
+        <!-- MESSAGE -->
+        <div class="box message-box">
 
             <h2>Send Us a <span>Message</span></h2>
 
-            <form action="mailto:velociamotors@gmail.com"
-                  method="post"
-                  enctype="text/plain">
+            <p>
+                Want to ask about a car, price, booking,
+                or availability? Contact us directly.
+            </p>
 
-                <input
-                    type="text"
-                    name="Name"
-                    placeholder="Your Name"
-                    required>
+            <a class="btn"
+               href="https://wa.me/923401376274?text=Hello%20VELOCIA%20MOTORS%2C%20I%20want%20to%20ask%20about%20a%20car."
+               target="_blank">
+                💬 Message on WhatsApp
+            </a>
 
-                <input
-                    type="email"
-                    name="Email"
-                    placeholder="Your Email"
-                    required>
+            <a class="btn"
+               href="mailto:velociamotors@gmail.com?subject=VELOCIA%20MOTORS%20Inquiry">
+                📧 Send an Email
+            </a>
 
-                <input
-                    type="text"
-                    name="Subject"
-                    placeholder="Subject"
-                    required>
-
-                <textarea
-                    name="Message"
-                    placeholder="Write your message..."
-                    required></textarea>
-
-                <button type="submit" class="btn">
-                    Send Message
-                </button>
-
-            </form>
+            <a class="btn"
+               href="https://www.instagram.com/velociamotors.pk/"
+               target="_blank">
+                📸 Open Instagram
+            </a>
 
         </div>
 
