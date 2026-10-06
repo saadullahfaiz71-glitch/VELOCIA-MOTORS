@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Car Details | VELOCIA MOTORS</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5f7;
+            color: #111827;
+        }
+
+        /* =========================
+           NAVBAR
+        ========================= */
+
+        .header {
+            height: 78px;
+            background: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 45px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,.25);
+        }
+
+        .logo {
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .logo-main {
+            display: block;
+            color: #fff;
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .logo-sub {
+            display: block;
+            color: #e11d48;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin-top: 5px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav a {
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: .3s;
+        }
+
+        .nav a:hover {
+            color: #ef3340;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .login,
+        .register {
+            text-decoration: none;
+            padding: 10px 17px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .login {
+            color: white;
+            border: 1px solid #4b5563;
+        }
+
+        .register {
+            color: white;
+            background: #e11d48;
+        }
+
+        /* =========================
+           BREADCRUMB
+        ========================= */
+
+        .breadcrumb {
+            width: 90%;
+            max-width: 1400px;
+            margin: 25px auto 15px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .breadcrumb a {
+            color: #e11d48;
+            text-decoration: none;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .details-container {
+            width: 90%;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        /* =========================
+           GALLERY
+        ========================= */
+
+        .gallery {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,.07);
+        }
+
+        .main-image {
+            width: 100%;
+            height: 480px;
+            object-fit: cover;
+            border-radius: 9px;
+            display: block;
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+
+        .thumbnail {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail.active {
+            border-color: #e11d48;
+        }
+
+        /* =========================
+           CAR INFORMATION
+        ========================= */
+
+        .car-title {
+            background: white;
+            margin-top: 22px;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,.07);
+        }
+
+        .brand {
+            color: #e11d48;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .car-title h1 {
+            font-size: 36px;
+            margin: 8px 0;
+        }
+
+        .price {
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 12px;
+        }
+
+        .location {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* =========================
+           SPECS
+        ========================= */
+
+        .specs {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .spec {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
+        }
+
+        .spec-label {
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .spec-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           CONTENT GRID
+        ========================= */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        .box {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        }
+
+        .box h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            color: #6b7280;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        /* =========================
+           FEATURES
+        ========================= */
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .feature {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        .feature::before {
+            content: "✓";
+            color: #e11d48;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* =========================
+           ACTION BOX
+        ========================= */
+
+        .action-box {
+            background: #111827;
+            color: white;
+            border-radius: 12px;
+            padding: 28px;
+            height: fit-content;
+        }
+
+        .action-box h2 {
+            margin-bottom: 10px;
+        }
+
+        .action-box p {
+            color: #9ca3af;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        .action-btn {
+            width: 100%;
+            height: 48px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .book-btn {
+            background: #e11d48;
+            color: white;
+        }
+
+        .purchase-btn {
+            background: white;
+            color: #111827;
+        }
+
+        .action-btn:hover {
+            opacity: .9;
+        }
+
+        /* =========================
+           MODAL
+        ========================= */
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 28px;
+            position: relative;
+        }
+
+        .modal-box h2 {
+            margin-bottom: 20px;
+        }
+
+        .close {
+            position: absolute;
+            right: 18px;
+            top: 15px;
+            border: none;
+            background: none;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            height: 90px;
+            resize: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            height: 46px;
+            background: #e11d48;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .nav {
+                display: none;
+            }
+
+            .header {
+                padding: 0 20px;
+            }
+
+            .main-image {
+                height: 350px;
+            }
+
+            .specs {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+
+            .details-container,
+            .breadcrumb {
+                width: 94%;
+            }
+
+            .main-image {
+                height: 240px;
+            }
+
+            .car-title h1 {
+                font-size: 27px;
+            }
+
+            .specs {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
+
+<header class="header">
+
+    <a href="index.html" class="logo">
+        <span class="logo-main">VELOCIA</span>
+        <span class="logo-sub">MOTORS</span>
+    </a>
+
+    <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="cars.html">Cars</a>
+        <a href="index.html#upcoming">Upcoming</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="actions">
+        <a href="login.html" class="login">Login</a>
+        <a href="register.html" class="register">Register</a>
+    </div>
+
+</header>
+
+
+<!-- =========================
+     BREADCRUMB
+========================= -->
+
+<div class="breadcrumb">
+    <a href="cars.html">Cars</a>
+    &nbsp; / &nbsp;
+    Car Details
+</div>
+
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<main class="details-container">
+
+
+    <!-- IMAGE -->
+
+    <section class="gallery">
+
+        <img
+            id="mainImage"
+            class="main-image"
+            src="images/car-1.jpg"
+            alt="Car"
+        >
+
+        <div class="thumbnails">
+
+            <img
+                class="thumbnail active"
+                src="images/car-1.jpg"
+                onclick="changeImage(this)"
+            >
+
+            <img
+                class="thumbnail"
+                src="images/car-1.jpg"
+                onclick="changeImage(this)"
+            >
+
+            <img
+                class="thumbnail"
+                src="images/car-1.jpg"
+                onclick="changeImage(this)"
+            >
+
+            <img
+                class="thumbnail"
+                src="images/car-1.jpg"
+                onclick="changeImage(this)"
+            >
+
+        </div>
+
+    </section>
+
+
+    <!-- TITLE -->
+
+    <section class="car-title">
+
+        <div class="brand" id="carBrand">
+            BMW
+        </div>
+
+        <h1 id="carName">
+            BMW M5 Competition
+        </h1>
+
+        <div class="price" id="carPrice">
+            PKR 8.50 Crore
+        </div>
+
+        <div class="location">
+            📍 Karachi, Pakistan
+        </div>
+
+    </section>
+
+
+    <!-- SPECS -->
+
+    <section class="specs">
+
+        <div class="spec">
+            <div class="spec-label">Year</div>
+            <div class="spec-value" id="carYear">2025</div>
+        </div>
+
+        <div class="spec">
+            <div class="spec-label">Engine</div>
+            <div class="spec-value" id="carEngine">4.4L V8</div>
+        </div>
+
+        <div class="spec">
+            <div class="spec-label">Power</div>
+            <div class="spec-value" id="carPower">617 HP</div>
+        </div>
+
+        <div class="spec">
+            <div class="spec-label">Transmission</div>
+            <div class="spec-value" id="carTransmission">
+                Automatic
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- CONTENT -->
+
+    <section class="content-grid">
+
+
+        <div>
+
+            <div class="box">
+
+                <h2>About This Car</h2>
+
+                <p class="description" id="carDescription">
+                    Experience premium performance, advanced technology
+                    and luxurious comfort with this vehicle. This car is
+                    presented by VELOCIA MOTORS for customers looking for
+                    quality, performance and modern design.
+                </p>
+
+            </div>
+
+
+            <div class="box" style="margin-top:22px;">
+
+                <h2>Key Features</h2>
+
+                <div class="features">
+
+                    <div class="feature">
+                        Premium Interior
+                    </div>
+
+                    <div class="feature">
+                        Digital Display
+                    </div>
+
+                    <div class="feature">
+                        Reverse Camera
+                    </div>
+
+                    <div class="feature">
+                        Parking Sensors
+                    </div>
+
+                    <div class="feature">
+                        Apple CarPlay
+                    </div>
+
+                    <div class="feature">
+                        Advanced Safety
+                    </div>
+
+                    <div class="feature">
+                        Climate Control
+                    </div>
+
+                    <div class="feature">
+                        Alloy Wheels
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTION -->
+
+        <aside class="action-box">
+
+            <h2>Interested?</h2>
+
+            <p>
+                Book an appointment or send a purchase request
+                to our VELOCIA MOTORS team.
+            </p>
+
+            <button
+                class="action-btn book-btn"
+                onclick="openModal('bookingModal')"
+            >
+                Book Inspection
+            </button>
+
+            <button
+                class="action-btn purchase-btn"
+                onclick="openModal('purchaseModal')"
+            >
+                Request to Purchase
+            </button>
+
+        </aside>
+
+    </section>
+
+</main>
+
+
+<!-- =========================
+     BOOKING MODAL
+========================= -->
+
+<div class="modal" id="bookingModal">
+
+    <div class="modal-box">
+
+        <button
+            class="close"
+            onclick="closeModal('bookingModal')"
+        >
+            ×
+        </button>
+
+        <h2>Book Inspection</h2>
+
+        <div class="form-group">
+
+            <label>Your Name</label>
+
+            <input
+                type="text"
+                id="bookingName"
+                placeholder="Enter your name"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Phone Number</label>
+
+            <input
+                type="tel"
+                id="bookingPhone"
+                placeholder="03XXXXXXXXX"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Preferred Date</label>
+
+            <input
+                type="date"
+                id="bookingDate"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Message</label>
+
+            <textarea
+                id="bookingMessage"
+                placeholder="Any special request?"
+            ></textarea>
+
+        </div>
+
+        <button
+            class="submit-btn"
+            onclick="submitBooking()"
+        >
+            Send Booking Request
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     PURCHASE MODAL
+========================= -->
+
+<div class="modal" id="purchaseModal">
+
+    <div class="modal-box">
+
+        <button
+            class="close"
+            onclick="closeModal('purchaseModal')"
+        >
+            ×
+        </button>
+
+        <h2>Purchase Request</h2>
+
+        <div class="form-group">
+
+            <label>Your Name</label>
+
+            <input
+                type="text"
+                id="purchaseName"
+                placeholder="Enter your name"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Phone Number</label>
+
+            <input
+                type="tel"
+                id="purchasePhone"
+                placeholder="03XXXXXXXXX"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Message</label>
+
+            <textarea
+                id="purchaseMessage"
+                placeholder="Tell us about your request..."
+            ></textarea>
+
+        </div>
+
+        <button
+            class="submit-btn"
+            onclick="submitPurchase()"
+        >
+            Send Purchase Request
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* =========================
+       CAR DATA
+    ========================= */
+
+    const cars = {
+
+        "bmw-m5": {
+            brand: "BMW",
+            name: "BMW M5 Competition",
+            price: "PKR 8.50 Crore",
+            year: "2025",
+            engine: "4.4L V8",
+            power: "617 HP",
+            transmission: "Automatic",
+            image: "images/car-1.jpg",
+            description:
+                "A high-performance BMW combining luxury, technology and powerful driving performance."
+        },
+
+        "mercedes-amg-gt": {
+            brand: "Mercedes",
+            name: "Mercedes-AMG GT",
+            price: "PKR 7.20 Crore",
+            year: "2025",
+            engine: "4.0L V8",
+            power: "577 HP",
+            transmission: "Automatic",
+            image: "images/car-2.jpg",
+            description:
+                "A premium performance coupe with aggressive styling, luxury and advanced technology."
+        },
+
+        "porsche-911": {
+            brand: "Porsche",
+            name: "Porsche 911 Carrera",
+            price: "PKR 6.50 Crore",
+            year: "2025",
+            engine: "3.0L Flat-6",
+            power: "379 HP",
+            transmission: "Automatic",
+            image: "images/car-3.jpg",
+            description:
+                "An iconic sports car offering precision handling, premium comfort and exciting performance."
+        },
+
+        "toyota-corolla": {
+            brand: "Toyota",
+            name: "Toyota Corolla Grande",
+            price: "PKR 95 Lac",
+            year: "2025",
+            engine: "1.8L",
+            power: "138 HP",
+            transmission: "Automatic",
+            image: "images/car-4.jpg",
+            description:
+                "A practical sedan combining comfort, technology and everyday usability."
+        },
+
+        "honda-civic": {
+            brand: "Honda",
+            name: "Honda Civic RS",
+            price: "PKR 1.05 Crore",
+            year: "2025",
+            engine: "1.5L Turbo",
+            power: "176 HP",
+            transmission: "Automatic",
+            image: "images/car-5.jpg",
+            description:
+                "A modern sedan with sporty styling, comfortable interior and useful technology."
+        },
+
+        "kia-sportage": {
+            brand: "KIA",
+            name: "KIA Sportage",
+            price: "PKR 1.15 Crore",
+            year: "2025",
+            engine: "1.6L Turbo",
+            power: "177 HP",
+            transmission: "Automatic",
+            image: "images/car-6.jpg",
+            description:
+                "A modern SUV designed for comfort, practicality and everyday driving."
+        },
+
+        "hyundai-tucson": {
+            brand: "Hyundai",
+            name: "Hyundai Tucson",
+            price: "PKR 1.10 Crore",
+            year: "2025",
+            engine: "2.0L",
+            power: "155 HP",
+            transmission: "Automatic",
+            image: "images/car-7.jpg",
+            description:
+                "A stylish SUV with modern technology, spacious comfort and practical features."
+        },
+
+        "audi-a6": {
+            brand: "Audi",
+            name: "Audi A6",
+            price: "PKR 3.80 Crore",
+            year: "2025",
+            engine: "2.0L Turbo",
+            power: "261 HP",
+            transmission: "Automatic",
+            image: "images/car-8.jpg",
+            description:
+                "A premium executive sedan focused on luxury, technology and refined performance."
+        },
+
+        "bmw-3-series": {
+            brand: "BMW",
+            name: "BMW 3 Series",
+            price: "PKR 2.90 Crore",
+            year: "2025",
+            engine: "2.0L Turbo",
+            power: "255 HP",
+            transmission: "Automatic",
+            image: "images/car-9.jpg",
+            description:
+                "A premium sports sedan combining driving dynamics, technology and everyday comfort."
+        }
+
+    };
+
+
+    /* =========================
+       LOAD CAR
+    ========================= */
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const carId =
+        params.get("car") || "bmw-m5";
+
+    const car =
+        cars[carId] || cars["bmw-m5"];
+
+
+    document.getElementById("carBrand").innerText =
+        car.brand;
+
+    document.getElementById("carName").innerText =
+        car.name;
+
+    document.getElementById("carPrice").innerText =
+        car.price;
+
+    document.getElementById("carYear").innerText =
+        car.year;
+
+    document.getElementById("carEngine").innerText =
+        car.engine;
+
+    document.getElementById("carPower").innerText =
+        car.power;
+
+    document.getElementById("carTransmission").innerText =
+        car.transmission;
+
+    document.getElementById("carDescription").innerText =
+        car.description;
+
+    document.getElementById("mainImage").src =
+        car.image;
+
+
+    /* =========================
+       IMAGE CHANGE
+    ========================= */
+
+    function changeImage(image) {
+
+        document.getElementById("mainImage").src =
+            image.src;
+
+        document
+            .querySelectorAll(".thumbnail")
+            .forEach(item => {
+
+                item.classList.remove("active");
+
+            });
+
+        image.classList.add("active");
+    }
+
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    function openModal(id) {
+
+        document
+            .getElementById(id)
+            .classList.add("active");
+
+    }
+
+
+    function closeModal(id) {
+
+        document
+            .getElementById(id)
+            .classList.remove("active");
+
+    }
+
+
+    /* =========================
+       BOOKING
+    ========================= */
+
+    function submitBooking() {
+
+        const name =
+            document.getElementById("bookingName").value.trim();
+
+        const phone =
+            document.getElementById("bookingPhone").value.trim();
+
+        const date =
+            document.getElementById("bookingDate").value;
+
+
+        if (!name || !phone || !date) {
+
+            alert("Please fill all required fields.");
+
+            return;
+        }
+
+
+        alert(
+            "Booking request submitted successfully!"
+        );
+
+        closeModal("bookingModal");
+
+    }
+
+
+    /* =========================
+       PURCHASE
+    ========================= */
+
+    function submitPurchase() {
+
+        const name =
+            document.getElementById("purchaseName").value.trim();
+
+        const phone =
+            document.getElementById("purchasePhone").value.trim();
+
+
+        if (!name || !phone) {
+
+            alert("Please enter your name and phone number.");
+
+            return;
+        }
+
+
+        alert(
+            "Purchase request submitted successfully!"
+        );
+
+        closeModal("purchaseModal");
+
+    }
+
+
+    /* =========================
+       CLOSE ON OUTSIDE CLICK
+    ========================= */
+
+    window.addEventListener("click", function(event) {
+
+        if (event.target.classList.contains("modal")) {
+
+            event.target.classList.remove("active");
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

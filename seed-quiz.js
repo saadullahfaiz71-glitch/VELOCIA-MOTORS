@@ -1,4 +1,4 @@
-const db = require("./database");
+const sql = require("./database");
 
 const questions = [
 
@@ -104,43 +104,69 @@ const questions = [
 
 ];
 
+async function seedQuiz() {
 
-const insert = db.prepare(`
-    INSERT INTO quiz_questions (
-        question,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        correct_answer,
-        category
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-`);
+    try {
 
+        const existing = await sql`
+            SELECT COUNT(*)::int AS count
+            FROM quiz_questions
+        `;
 
-const insertMany = db.transaction(() => {
+        if (existing[0].count > 0) {
 
-    for (const q of questions) {
+            console.log("");
+            console.log("======================================");
+            console.log("Quiz questions already exist.");
+            console.log("Skipping quiz seed to avoid duplicates.");
+            console.log("======================================");
 
-        insert.run(
-            q.question,
-            q.a,
-            q.b,
-            q.c,
-            q.d,
-            q.answer,
-            q.category
-        );
+            await sql.end();
+            process.exit(0);
+        }
 
+        for (const q of questions) {
+
+            await sql`
+                INSERT INTO quiz_questions (
+                    question,
+                    option_a,
+                    option_b,
+                    option_c,
+                    option_d,
+                    correct_answer,
+                    category
+                )
+                VALUES (
+                    ${q.question},
+                    ${q.a},
+                    ${q.b},
+                    ${q.c},
+                    ${q.d},
+                    ${q.answer},
+                    ${q.category}
+                )
+            `;
+
+        }
+
+        console.log("");
+        console.log("======================================");
+        console.log("       VELOCIA MOTORS QUIZ");
+        console.log("======================================");
+        console.log(`${questions.length} quiz questions added successfully!`);
+        console.log("======================================");
+
+        await sql.end();
+        process.exit(0);
+
+    } catch (error) {
+
+        console.error("❌ Quiz seed error:", error);
+
+        await sql.end();
+        process.exit(1);
     }
+}
 
-});
-
-
-insertMany();
-
-console.log(
-    `${questions.length} quiz questions added successfully!`
-);
-db.close();
+seedQuiz();

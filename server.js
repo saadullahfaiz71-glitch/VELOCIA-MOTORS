@@ -31,7 +31,6 @@ app.use(
             "velocia-motors-change-this-secret",
 
         resave: false,
-
         saveUninitialized: false,
 
         cookie: {
@@ -50,40 +49,26 @@ app.use(
 app.use(express.static("public"));
 
 // ==========================================
-// DATABASE MIGRATIONS
-// ==========================================
-
-function addColumnIfMissing(table, column, definition) {
-    const columns = db
-        .prepare(`PRAGMA table_info(${table})`)
-        .all();
-
-    const exists = columns.some(
-        columnInfo => columnInfo.name === column
-    );
-
-    if (!exists) {
-        db.prepare(
-            `ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`
-        ).run();
-
-        console.log(
-            `Database migration: ${table}.${column} added`
-        );
-    }
-}
-
-addColumnIfMissing(
-    "purchase_requests",
-    "quiz_result_id",
-    "INTEGER"
-);
-
-// ==========================================
 // AUTH HELPERS
 // ==========================================
 
-function requireLogin(req, res, next) {
+async function getUserById(id) {
+    const result = await db`
+        SELECT
+            id,
+            name,
+            email,
+            role,
+            created_at
+        FROM users
+        WHERE id = ${id}
+        LIMIT 1
+    `;
+
+    return result[0] || null;
+}
+
+async function requireLogin(req, res, next) {
     try {
         if (!req.session.user) {
             return res.status(401).json({
@@ -92,17 +77,9 @@ function requireLogin(req, res, next) {
             });
         }
 
-        const currentUser = db
-            .prepare(`
-                SELECT
-                    id,
-                    name,
-                    email,
-                    role
-                FROM users
-                WHERE id = ?
-            `)
-            .get(req.session.user.id);
+        const currentUser = await getUserById(
+            req.session.user.id
+        );
 
         if (!currentUser) {
             return req.session.destroy(() => {
@@ -114,14 +91,10 @@ function requireLogin(req, res, next) {
         }
 
         req.currentUser = currentUser;
-
         next();
 
     } catch (error) {
-        console.error(
-            "LOGIN AUTH ERROR:",
-            error
-        );
+        console.error("LOGIN AUTH ERROR:", error);
 
         res.status(500).json({
             success: false,
@@ -130,11 +103,7 @@ function requireLogin(req, res, next) {
     }
 }
 
-// ==========================================
-// ADMIN AUTH
-// ==========================================
-
-function requireAdmin(req, res, next) {
+async function requireAdmin(req, res, next) {
     try {
         if (!req.session.user) {
             return res.status(401).json({
@@ -143,17 +112,9 @@ function requireAdmin(req, res, next) {
             });
         }
 
-        const currentUser = db
-            .prepare(`
-                SELECT
-                    id,
-                    name,
-                    email,
-                    role
-                FROM users
-                WHERE id = ?
-            `)
-            .get(req.session.user.id);
+        const currentUser = await getUserById(
+            req.session.user.id
+        );
 
         if (!currentUser) {
             return req.session.destroy(() => {
@@ -180,10 +141,7 @@ function requireAdmin(req, res, next) {
         next();
 
     } catch (error) {
-        console.error(
-            "ADMIN AUTH ERROR:",
-            error
-        );
+        console.error("ADMIN AUTH ERROR:", error);
 
         res.status(500).json({
             success: false,
@@ -238,15 +196,17 @@ app.post("/api/register", async (req, res) => {
             });
         }
 
-        const existingUser = db
-            .prepare(`
-                SELECT id
-                FROM users
-                WHERE email = ?
-            `)
-            .get(email);
+        const cleanEmail =
+            String(email).trim().toLowerCase();
 
-        if (existingUser) {
+        const existingUser = await db`
+            SELECT id
+            FROM users
+            WHERE LOWER(email) = ${cleanEmail}
+            LIMIT 1
+        `;
+
+        if (existingUser.length > 0) {
             return res.status(409).json({
                 success: false,
                 message:
@@ -257,35 +217,33 @@ app.post("/api/register", async (req, res) => {
         const passwordHash =
             await bcrypt.hash(password, 12);
 
-        const result = db
-            .prepare(`
-                INSERT INTO users
-                (
-                    name,
-                    email,
-                    password_hash,
-                    role
-                )
-                VALUES (?, ?, ?, 'customer')
-            `)
-            .run(
+        const result = await db`
+            INSERT INTO users
+            (
                 name,
                 email,
-                passwordHash
-            );
+                password_hash,
+                role
+            )
+            VALUES
+            (
+                ${String(name).trim()},
+                ${cleanEmail},
+                ${passwordHash},
+                'customer'
+            )
+            RETURNING id
+        `;
 
         res.status(201).json({
             success: true,
             message:
                 "Account created successfully!",
-            userId: result.lastInsertRowid
+            userId: result[0].id
         });
 
     } catch (error) {
-        console.error(
-            "REGISTER ERROR:",
-            error
-        );
+        console.error("REGISTER ERROR:", error);
 
         res.status(500).json({
             success: false,
@@ -314,18 +272,22 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
-        const user = db
-            .prepare(`
-                SELECT
-                    id,
-                    name,
-                    email,
-                    password_hash,
-                    role
-                FROM users
-                WHERE email = ?
-            `)
-            .get(email);
+        const cleanEmail =
+            String(email).trim().toLowerCase();
+
+        const result = await db`
+            SELECT
+                id,
+                name,
+                email,
+                password_hash,
+                role
+            FROM users
+            WHERE LOWER(email) = ${cleanEmail}
+            LIMIT 1
+        `;
+
+        const user = result[0];
 
         if (!user) {
             return res.status(401).json({
@@ -349,7 +311,6 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
-        // Clear old session data
         req.session.regenerate(error => {
             if (error) {
                 console.error(
@@ -399,10 +360,7 @@ app.post("/api/login", async (req, res) => {
         });
 
     } catch (error) {
-        console.error(
-            "LOGIN ERROR:",
-            error
-        );
+        console.error("LOGIN ERROR:", error);
 
         res.status(500).json({
             success: false,
@@ -460,15 +418,13 @@ app.post("/api/logout", (req, res) => {
 // PUBLIC — ALL CARS
 // ==========================================
 
-app.get("/api/cars", (req, res) => {
+app.get("/api/cars", async (req, res) => {
     try {
-        const cars = db
-            .prepare(`
-                SELECT *
-                FROM cars
-                ORDER BY id ASC
-            `)
-            .all();
+        const cars = await db`
+            SELECT *
+            FROM cars
+            ORDER BY id ASC
+        `;
 
         res.json({
             success: true,
@@ -493,15 +449,16 @@ app.get("/api/cars", (req, res) => {
 // PUBLIC — SINGLE CAR
 // ==========================================
 
-app.get("/api/cars/:id", (req, res) => {
+app.get("/api/cars/:id", async (req, res) => {
     try {
-        const car = db
-            .prepare(`
-                SELECT *
-                FROM cars
-                WHERE id = ?
-            `)
-            .get(req.params.id);
+        const result = await db`
+            SELECT *
+            FROM cars
+            WHERE id = ${req.params.id}
+            LIMIT 1
+        `;
+
+        const car = result[0];
 
         if (!car) {
             return res.status(404).json({
@@ -536,7 +493,7 @@ app.get("/api/cars/:id", (req, res) => {
 app.post(
     "/api/bookings",
     requireLogin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 car_id,
@@ -560,15 +517,14 @@ app.post(
                 });
             }
 
-            const car = db
-                .prepare(`
-                    SELECT id
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(car_id);
+            const car = await db`
+                SELECT id
+                FROM cars
+                WHERE id = ${car_id}
+                LIMIT 1
+            `;
 
-            if (!car) {
+            if (car.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message:
@@ -576,33 +532,33 @@ app.post(
                 });
             }
 
-            const result = db
-                .prepare(`
-                    INSERT INTO bookings
-                    (
-                        user_id,
-                        car_id,
-                        booking_date,
-                        booking_time,
-                        message,
-                        status
-                    )
-                    VALUES (?, ?, ?, ?, ?, 'Pending')
-                `)
-                .run(
+            const result = await db`
+                INSERT INTO bookings
+                (
                     user_id,
                     car_id,
                     booking_date,
                     booking_time,
-                    message || ""
-                );
+                    message,
+                    status
+                )
+                VALUES
+                (
+                    ${user_id},
+                    ${car_id},
+                    ${booking_date},
+                    ${booking_time},
+                    ${message || ""},
+                    'Pending'
+                )
+                RETURNING id
+            `;
 
             res.status(201).json({
                 success: true,
                 message:
                     "Inspection booking submitted successfully!",
-                bookingId:
-                    result.lastInsertRowid
+                bookingId: result[0].id
             });
 
         } catch (error) {
@@ -627,7 +583,7 @@ app.post(
 app.get(
     "/api/bookings/user/:userId",
     requireLogin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const requestedUserId =
                 Number(req.params.userId);
@@ -643,31 +599,30 @@ app.get(
                 });
             }
 
-            const bookings = db
-                .prepare(`
-                    SELECT
-                        bookings.id,
-                        bookings.booking_date,
-                        bookings.booking_time,
-                        bookings.message,
-                        bookings.status,
-                        bookings.created_at,
+            const bookings = await db`
+                SELECT
+                    bookings.id,
+                    bookings.booking_date,
+                    bookings.booking_time,
+                    bookings.message,
+                    bookings.status,
+                    bookings.created_at,
 
-                        cars.brand,
-                        cars.name,
-                        cars.price,
-                        cars.image
+                    cars.brand,
+                    cars.name,
+                    cars.price,
+                    cars.image
 
-                    FROM bookings
+                FROM bookings
 
-                    INNER JOIN cars
-                        ON bookings.car_id = cars.id
+                INNER JOIN cars
+                    ON bookings.car_id = cars.id
 
-                    WHERE bookings.user_id = ?
+                WHERE bookings.user_id =
+                    ${req.currentUser.id}
 
-                    ORDER BY bookings.id DESC
-                `)
-                .all(req.currentUser.id);
+                ORDER BY bookings.id DESC
+            `;
 
             res.json({
                 success: true,
@@ -696,7 +651,7 @@ app.get(
 app.post(
     "/api/purchase-requests",
     requireLogin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 car_id,
@@ -715,15 +670,14 @@ app.post(
                 });
             }
 
-            const car = db
-                .prepare(`
-                    SELECT id
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(car_id);
+            const car = await db`
+                SELECT id
+                FROM cars
+                WHERE id = ${car_id}
+                LIMIT 1
+            `;
 
-            if (!car) {
+            if (car.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message:
@@ -732,21 +686,16 @@ app.post(
             }
 
             if (quiz_result_id) {
-                const quizResult = db
-                    .prepare(`
-                        SELECT id
-                        FROM quiz_results
-                        WHERE id = ?
-                          AND user_id = ?
-                          AND car_id = ?
-                    `)
-                    .get(
-                        quiz_result_id,
-                        user_id,
-                        car_id
-                    );
+                const quizResult = await db`
+                    SELECT id
+                    FROM quiz_results
+                    WHERE id = ${quiz_result_id}
+                    AND user_id = ${user_id}
+                    AND car_id = ${car_id}
+                    LIMIT 1
+                `;
 
-                if (!quizResult) {
+                if (quizResult.length === 0) {
                     return res.status(404).json({
                         success: false,
                         message:
@@ -755,77 +704,74 @@ app.post(
                 }
             }
 
-            const result = db
-                .prepare(`
-                    INSERT INTO purchase_requests
-                    (
-                        user_id,
-                        car_id,
-                        message,
-                        status,
-                        quiz_result_id
-                    )
-                    VALUES (?, ?, ?, 'Pending', ?)
-                `)
-                .run(
+            const result = await db`
+                INSERT INTO purchase_requests
+                (
                     user_id,
                     car_id,
-                    message || "",
-                    quiz_result_id || null
-                );
+                    message,
+                    status,
+                    quiz_result_id
+                )
+                VALUES
+                (
+                    ${user_id},
+                    ${car_id},
+                    ${message || ""},
+                    'Pending',
+                    ${quiz_result_id || null}
+                )
+                RETURNING id
+            `;
 
-            const savedRequest = db
-                .prepare(`
-                    SELECT
-                        pr.id,
-                        pr.user_id,
-                        pr.car_id,
-                        pr.message,
-                        pr.status,
-                        pr.quiz_result_id,
-                        pr.created_at,
+            const savedRequest = await db`
+                SELECT
+                    pr.id,
+                    pr.user_id,
+                    pr.car_id,
+                    pr.message,
+                    pr.status,
+                    pr.quiz_result_id,
+                    pr.created_at,
 
-                        u.name AS customer_name,
-                        u.email AS customer_email,
+                    u.name AS customer_name,
+                    u.email AS customer_email,
 
-                        c.brand,
-                        c.name AS car_name,
-                        c.price,
+                    c.brand,
+                    c.name AS car_name,
+                    c.price,
 
-                        qr.score AS quiz_score,
-                        qr.total_questions
-                            AS quiz_total_questions,
-                        qr.correct_answers
-                            AS quiz_correct_answers,
-                        qr.wrong_answers
-                            AS quiz_wrong_answers,
-                        qr.preference
-                            AS quiz_preference
+                    qr.score AS quiz_score,
+                    qr.total_questions
+                        AS quiz_total_questions,
+                    qr.correct_answers
+                        AS quiz_correct_answers,
+                    qr.wrong_answers
+                        AS quiz_wrong_answers,
+                    qr.preference
+                        AS quiz_preference
 
-                    FROM purchase_requests pr
+                FROM purchase_requests pr
 
-                    LEFT JOIN users u
-                        ON pr.user_id = u.id
+                LEFT JOIN users u
+                    ON pr.user_id = u.id
 
-                    LEFT JOIN cars c
-                        ON pr.car_id = c.id
+                LEFT JOIN cars c
+                    ON pr.car_id = c.id
 
-                    LEFT JOIN quiz_results qr
-                        ON pr.quiz_result_id = qr.id
+                LEFT JOIN quiz_results qr
+                    ON pr.quiz_result_id = qr.id
 
-                    WHERE pr.id = ?
-                `)
-                .get(
-                    result.lastInsertRowid
-                );
+                WHERE pr.id = ${result[0].id}
+            `;
 
             res.status(201).json({
                 success: true,
                 message:
                     "Purchase request submitted successfully!",
-                requestId:
-                    result.lastInsertRowid,
-                request: savedRequest
+                requestId: result[0].id,
+                request:
+                    savedRequest[0] || null
             });
 
         } catch (error) {
@@ -851,7 +797,7 @@ app.post(
 app.get(
     "/api/purchase-requests/user/:userId",
     requireLogin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const requestedUserId =
                 Number(req.params.userId);
@@ -867,45 +813,44 @@ app.get(
                 });
             }
 
-            const requests = db
-                .prepare(`
-                    SELECT
-                        pr.id,
-                        pr.message,
-                        pr.status,
-                        pr.created_at,
-                        pr.quiz_result_id,
+            const requests = await db`
+                SELECT
+                    pr.id,
+                    pr.message,
+                    pr.status,
+                    pr.created_at,
+                    pr.quiz_result_id,
 
-                        cars.brand,
-                        cars.name,
-                        cars.price,
-                        cars.image,
+                    cars.brand,
+                    cars.name,
+                    cars.price,
+                    cars.image,
 
-                        qr.score AS quiz_score,
-                        qr.total_questions
-                            AS quiz_total_questions,
-                        qr.correct_answers
-                            AS quiz_correct_answers,
-                        qr.wrong_answers
-                            AS quiz_wrong_answers,
-                        qr.preference
-                            AS quiz_preference,
-                        qr.result_data
-                            AS quiz_result_data
+                    qr.score AS quiz_score,
+                    qr.total_questions
+                        AS quiz_total_questions,
+                    qr.correct_answers
+                        AS quiz_correct_answers,
+                    qr.wrong_answers
+                        AS quiz_wrong_answers,
+                    qr.preference
+                        AS quiz_preference,
+                    qr.result_data
+                        AS quiz_result_data
 
-                    FROM purchase_requests pr
+                FROM purchase_requests pr
 
-                    INNER JOIN cars
-                        ON pr.car_id = cars.id
+                INNER JOIN cars
+                    ON pr.car_id = cars.id
 
-                    LEFT JOIN quiz_results qr
-                        ON pr.quiz_result_id = qr.id
+                LEFT JOIN quiz_results qr
+                    ON pr.quiz_result_id = qr.id
 
-                    WHERE pr.user_id = ?
+                WHERE pr.user_id =
+                    ${req.currentUser.id}
 
-                    ORDER BY pr.id DESC
-                `)
-                .all(req.currentUser.id);
+                ORDER BY pr.id DESC
+            `;
 
             res.json({
                 success: true,
@@ -935,38 +880,36 @@ app.get(
 app.get(
     "/api/admin/bookings",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
-            const bookings = db
-                .prepare(`
-                    SELECT
-                        bookings.id,
-                        bookings.booking_date,
-                        bookings.booking_time,
-                        bookings.message,
-                        bookings.status,
-                        bookings.created_at,
+            const bookings = await db`
+                SELECT
+                    bookings.id,
+                    bookings.booking_date,
+                    bookings.booking_time,
+                    bookings.message,
+                    bookings.status,
+                    bookings.created_at,
 
-                        users.id AS user_id,
-                        users.name AS customer_name,
-                        users.email AS customer_email,
+                    users.id AS user_id,
+                    users.name AS customer_name,
+                    users.email AS customer_email,
 
-                        cars.id AS car_id,
-                        cars.brand,
-                        cars.name AS car_name,
-                        cars.price
+                    cars.id AS car_id,
+                    cars.brand,
+                    cars.name AS car_name,
+                    cars.price
 
-                    FROM bookings
+                FROM bookings
 
-                    INNER JOIN users
-                        ON bookings.user_id = users.id
+                INNER JOIN users
+                    ON bookings.user_id = users.id
 
-                    INNER JOIN cars
-                        ON bookings.car_id = cars.id
+                INNER JOIN cars
+                    ON bookings.car_id = cars.id
 
-                    ORDER BY bookings.id DESC
-                `)
-                .all();
+                ORDER BY bookings.id DESC
+            `;
 
             res.json({
                 success: true,
@@ -995,7 +938,7 @@ app.get(
 app.put(
     "/api/admin/bookings/:id/status",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const { status } = req.body;
 
@@ -1016,15 +959,14 @@ app.put(
                 });
             }
 
-            const booking = db
-                .prepare(`
-                    SELECT id
-                    FROM bookings
-                    WHERE id = ?
-                `)
-                .get(req.params.id);
+            const booking = await db`
+                SELECT id
+                FROM bookings
+                WHERE id = ${req.params.id}
+                LIMIT 1
+            `;
 
-            if (!booking) {
+            if (booking.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message:
@@ -1032,14 +974,11 @@ app.put(
                 });
             }
 
-            db.prepare(`
+            await db`
                 UPDATE bookings
-                SET status = ?
-                WHERE id = ?
-            `).run(
-                status,
-                req.params.id
-            );
+                SET status = ${status}
+                WHERE id = ${req.params.id}
+            `;
 
             res.json({
                 success: true,
@@ -1069,59 +1008,57 @@ app.put(
 app.get(
     "/api/admin/purchase-requests",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
-            const requests = db
-                .prepare(`
-                    SELECT
-                        purchase_requests.id,
-                        purchase_requests.message,
-                        purchase_requests.status,
-                        purchase_requests.created_at,
+            const requests = await db`
+                SELECT
+                    purchase_requests.id,
+                    purchase_requests.message,
+                    purchase_requests.status,
+                    purchase_requests.created_at,
 
-                        users.id AS user_id,
-                        users.name AS customer_name,
-                        users.email AS customer_email,
+                    users.id AS user_id,
+                    users.name AS customer_name,
+                    users.email AS customer_email,
 
-                        cars.id AS car_id,
-                        cars.brand,
-                        cars.name AS car_name,
-                        cars.price,
-                        cars.image,
+                    cars.id AS car_id,
+                    cars.brand,
+                    cars.name AS car_name,
+                    cars.price,
+                    cars.image,
 
-                        purchase_requests.quiz_result_id,
+                    purchase_requests.quiz_result_id,
 
-                        quiz_results.score
-                            AS quiz_score,
-                        quiz_results.total_questions
-                            AS quiz_total_questions,
-                        quiz_results.correct_answers
-                            AS quiz_correct_answers,
-                        quiz_results.wrong_answers
-                            AS quiz_wrong_answers,
-                        quiz_results.preference
-                            AS quiz_preference,
-                        quiz_results.result_data
-                            AS quiz_result_data,
-                        quiz_results.created_at
-                            AS quiz_created_at
+                    quiz_results.score
+                        AS quiz_score,
+                    quiz_results.total_questions
+                        AS quiz_total_questions,
+                    quiz_results.correct_answers
+                        AS quiz_correct_answers,
+                    quiz_results.wrong_answers
+                        AS quiz_wrong_answers,
+                    quiz_results.preference
+                        AS quiz_preference,
+                    quiz_results.result_data
+                        AS quiz_result_data,
+                    quiz_results.created_at
+                        AS quiz_created_at
 
-                    FROM purchase_requests
+                FROM purchase_requests
 
-                    INNER JOIN users
-                        ON purchase_requests.user_id = users.id
+                INNER JOIN users
+                    ON purchase_requests.user_id = users.id
 
-                    INNER JOIN cars
-                        ON purchase_requests.car_id = cars.id
+                INNER JOIN cars
+                    ON purchase_requests.car_id = cars.id
 
-                    LEFT JOIN quiz_results
-                        ON purchase_requests.quiz_result_id =
-                           quiz_results.id
+                LEFT JOIN quiz_results
+                    ON purchase_requests.quiz_result_id =
+                       quiz_results.id
 
-                    ORDER BY
-                        purchase_requests.id DESC
-                `)
-                .all();
+                ORDER BY
+                    purchase_requests.id DESC
+            `;
 
             res.json({
                 success: true,
@@ -1151,21 +1088,19 @@ app.get(
 app.get(
     "/api/admin/users",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
-            const users = db
-                .prepare(`
-                    SELECT
-                        id,
-                        name,
-                        email,
-                        role,
-                        created_at
-                    FROM users
-                    WHERE role = 'customer'
-                    ORDER BY id DESC
-                `)
-                .all();
+            const users = await db`
+                SELECT
+                    id,
+                    name,
+                    email,
+                    role,
+                    created_at
+                FROM users
+                WHERE role = 'customer'
+                ORDER BY id DESC
+            `;
 
             res.json({
                 success: true,
@@ -1195,15 +1130,13 @@ app.get(
 app.get(
     "/api/admin/cars",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
-            const cars = db
-                .prepare(`
-                    SELECT *
-                    FROM cars
-                    ORDER BY id DESC
-                `)
-                .all();
+            const cars = await db`
+                SELECT *
+                FROM cars
+                ORDER BY id DESC
+            `;
 
             res.json({
                 success: true,
@@ -1232,7 +1165,7 @@ app.get(
 app.post(
     "/api/admin/cars",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 brand,
@@ -1261,56 +1194,45 @@ app.post(
                 });
             }
 
-            const result = db
-                .prepare(`
-                    INSERT INTO cars
-                    (
-                        brand,
-                        name,
-                        price,
-                        year,
-                        engine,
-                        power,
-                        transmission,
-                        fuel,
-                        body_type,
-                        image,
-                        description,
-                        status
-                    )
-                    VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                `)
-                .run(
+            const result = await db`
+                INSERT INTO cars
+                (
                     brand,
                     name,
                     price,
-                    year || null,
-                    engine || "",
-                    power || "",
-                    transmission || "",
-                    fuel || "",
-                    body_type || "",
-                    image || "",
-                    description || "",
-                    status || "Available"
-                );
-
-            const newCar = db
-                .prepare(`
-                    SELECT *
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(
-                    result.lastInsertRowid
-                );
+                    year,
+                    engine,
+                    power,
+                    transmission,
+                    fuel,
+                    body_type,
+                    image,
+                    description,
+                    status
+                )
+                VALUES
+                (
+                    ${brand},
+                    ${name},
+                    ${price},
+                    ${year || null},
+                    ${engine || ""},
+                    ${power || ""},
+                    ${transmission || ""},
+                    ${fuel || ""},
+                    ${body_type || ""},
+                    ${image || ""},
+                    ${description || ""},
+                    ${status || "Available"}
+                )
+                RETURNING *
+            `;
 
             res.json({
                 success: true,
                 message:
                     "Car added successfully.",
-                car: newCar
+                car: result[0]
             });
 
         } catch (error) {
@@ -1322,7 +1244,8 @@ app.post(
             res.status(500).json({
                 success: false,
                 message:
-                    "Unable to add car."
+                    "Unable to add car.",
+                error: error.message
             });
         }
     }
@@ -1335,7 +1258,7 @@ app.post(
 app.put(
     "/api/admin/cars/:id",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 brand,
@@ -1352,22 +1275,6 @@ app.put(
                 status
             } = req.body;
 
-            const car = db
-                .prepare(`
-                    SELECT id
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(req.params.id);
-
-            if (!car) {
-                return res.status(404).json({
-                    success: false,
-                    message:
-                        "Car not found."
-                });
-            }
-
             if (
                 !brand ||
                 !name ||
@@ -1380,51 +1287,45 @@ app.put(
                 });
             }
 
-            db.prepare(`
+            const existingCar = await db`
+                SELECT id
+                FROM cars
+                WHERE id = ${req.params.id}
+                LIMIT 1
+            `;
+
+            if (existingCar.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Car not found."
+                });
+            }
+
+            const result = await db`
                 UPDATE cars
                 SET
-                    brand = ?,
-                    name = ?,
-                    price = ?,
-                    year = ?,
-                    engine = ?,
-                    power = ?,
-                    transmission = ?,
-                    fuel = ?,
-                    body_type = ?,
-                    image = ?,
-                    description = ?,
-                    status = ?
-                WHERE id = ?
-            `).run(
-                brand,
-                name,
-                price,
-                year || null,
-                engine || "",
-                power || "",
-                transmission || "",
-                fuel || "",
-                body_type || "",
-                image || "",
-                description || "",
-                status || "Available",
-                req.params.id
-            );
-
-            const updatedCar = db
-                .prepare(`
-                    SELECT *
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(req.params.id);
+                    brand = ${brand},
+                    name = ${name},
+                    price = ${price},
+                    year = ${year || null},
+                    engine = ${engine || ""},
+                    power = ${power || ""},
+                    transmission = ${transmission || ""},
+                    fuel = ${fuel || ""},
+                    body_type = ${body_type || ""},
+                    image = ${image || ""},
+                    description = ${description || ""},
+                    status = ${status || "Available"}
+                WHERE id = ${req.params.id}
+                RETURNING *
+            `;
 
             res.json({
                 success: true,
                 message:
                     "Car updated successfully.",
-                car: updatedCar
+                car: result[0]
             });
 
         } catch (error) {
@@ -1436,7 +1337,8 @@ app.put(
             res.status(500).json({
                 success: false,
                 message:
-                    "Unable to update car."
+                    "Unable to update car.",
+                error: error.message
             });
         }
     }
@@ -1449,17 +1351,16 @@ app.put(
 app.delete(
     "/api/admin/cars/:id",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
         try {
-            const car = db
-                .prepare(`
-                    SELECT id
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(req.params.id);
+            const existingCar = await db`
+                SELECT id
+                FROM cars
+                WHERE id = ${req.params.id}
+                LIMIT 1
+            `;
 
-            if (!car) {
+            if (existingCar.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message:
@@ -1467,10 +1368,10 @@ app.delete(
                 });
             }
 
-            db.prepare(`
+            await db`
                 DELETE FROM cars
-                WHERE id = ?
-            `).run(req.params.id);
+                WHERE id = ${req.params.id}
+            `;
 
             res.json({
                 success: true,
@@ -1487,7 +1388,8 @@ app.delete(
             res.status(500).json({
                 success: false,
                 message:
-                    "Unable to delete car."
+                    "Unable to delete car.",
+                error: error.message
             });
         }
     }
@@ -1499,22 +1401,20 @@ app.delete(
 
 app.get(
     "/api/quiz/questions",
-    (req, res) => {
+    async (req, res) => {
         try {
-            const questions = db
-                .prepare(`
-                    SELECT
-                        id,
-                        question,
-                        option_a,
-                        option_b,
-                        option_c,
-                        option_d,
-                        category
-                    FROM quiz_questions
-                    ORDER BY id ASC
-                `)
-                .all();
+            const questions = await db`
+                SELECT
+                    id,
+                    question,
+                    option_a,
+                    option_b,
+                    option_c,
+                    option_d,
+                    category
+                FROM quiz_questions
+                ORDER BY id ASC
+            `;
 
             res.json({
                 success: true,
@@ -1544,7 +1444,7 @@ app.get(
 app.post(
     "/api/quiz/results",
     requireLogin,
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 car_id,
@@ -1576,15 +1476,14 @@ app.post(
                 });
             }
 
-            const car = db
-                .prepare(`
-                    SELECT id
-                    FROM cars
-                    WHERE id = ?
-                `)
-                .get(car_id);
+            const car = await db`
+                SELECT id
+                FROM cars
+                WHERE id = ${car_id}
+                LIMIT 1
+            `;
 
-            if (!car) {
+            if (car.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message:
@@ -1596,12 +1495,9 @@ app.post(
 
             try {
                 parsedResult =
-                    typeof result_data ===
-                    "string"
+                    typeof result_data === "string"
                         ? JSON.parse(result_data)
-                        : (
-                            result_data || {}
-                        );
+                        : result_data || {};
             } catch (error) {
                 console.error(
                     "RESULT DATA PARSE ERROR:",
@@ -1623,21 +1519,19 @@ app.post(
                     ? parsedResult.question_ids
                     : [];
 
-            const questions = db
-                .prepare(`
-                    SELECT
-                        id,
-                        question,
-                        option_a,
-                        option_b,
-                        option_c,
-                        option_d,
-                        correct_answer,
-                        category
-                    FROM quiz_questions
-                    ORDER BY id ASC
-                `)
-                .all();
+            const questions = await db`
+                SELECT
+                    id,
+                    question,
+                    option_a,
+                    option_b,
+                    option_c,
+                    option_d,
+                    correct_answer,
+                    category
+                FROM quiz_questions
+                ORDER BY id ASC
+            `;
 
             let correctAnswers = 0;
             let knowledgeQuestions = 0;
@@ -1650,9 +1544,7 @@ app.post(
                         .trim()
                         .toLowerCase();
 
-                if (
-                    category === "preference"
-                ) {
+                if (category === "preference") {
                     return;
                 }
 
@@ -1740,70 +1632,60 @@ app.post(
                         correctAnswers
                 );
 
-            const result = db
-                .prepare(`
-                    INSERT INTO quiz_results
-                    (
-                        user_id,
-                        car_id,
-                        total_questions,
-                        correct_answers,
-                        wrong_answers,
-                        score,
-                        result_data,
-                        preference
-                    )
-                    VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?)
-                `)
-                .run(
+            const result = await db`
+                INSERT INTO quiz_results
+                (
                     user_id,
                     car_id,
-                    knowledgeQuestions,
-                    correctAnswers,
-                    wrongAnswers,
-                    correctAnswers,
-                    JSON.stringify(
-                        parsedResult
-                    ),
-                    preference ||
-                        "Balanced"
-                );
+                    total_questions,
+                    correct_answers,
+                    wrong_answers,
+                    score,
+                    result_data,
+                    preference
+                )
+                VALUES
+                (
+                    ${user_id},
+                    ${car_id},
+                    ${knowledgeQuestions},
+                    ${correctAnswers},
+                    ${wrongAnswers},
+                    ${correctAnswers},
+                    ${JSON.stringify(parsedResult)},
+                    ${preference || "Balanced"}
+                )
+                RETURNING id
+            `;
 
-            const savedResult = db
-                .prepare(`
-                    SELECT
-                        qr.*,
+            const savedResult = await db`
+                SELECT
+                    qr.*,
 
-                        u.name
-                            AS customer_name,
-                        u.email
-                            AS customer_email,
+                    u.name AS customer_name,
+                    u.email AS customer_email,
 
-                        c.brand,
-                        c.name
-                            AS car_name,
-                        c.price
+                    c.brand,
+                    c.name AS car_name,
+                    c.price
 
-                    FROM quiz_results qr
+                FROM quiz_results qr
 
-                    LEFT JOIN users u
-                        ON qr.user_id = u.id
+                LEFT JOIN users u
+                    ON qr.user_id = u.id
 
-                    LEFT JOIN cars c
-                        ON qr.car_id = c.id
+                LEFT JOIN cars c
+                    ON qr.car_id = c.id
 
-                    WHERE qr.id = ?
-                `)
-                .get(
-                    result.lastInsertRowid
-                );
+                WHERE qr.id = ${result[0].id}
+            `;
 
             res.json({
                 success: true,
                 message:
                     "Quiz result saved successfully.",
-                result: savedResult
+                result:
+                    savedResult[0] || null
             });
 
         } catch (error) {
@@ -1823,56 +1705,6 @@ app.post(
 );
 
 // ==========================================
-// ADMIN ACCOUNT
-// ==========================================
-
-const adminEmail = "admin@velocia.com";
-const adminPassword = "Admin@12345";
-
-const existingAdmin = db
-    .prepare(
-        "SELECT id FROM users WHERE email = ?"
-    )
-    .get(adminEmail);
-
-if (!existingAdmin) {
-    const passwordHash =
-        bcrypt.hashSync(
-            adminPassword,
-            10
-        );
-
-    db.prepare(`
-        INSERT INTO users
-        (name, email, password_hash, role)
-        VALUES (?, ?, ?, ?)
-    `).run(
-        "Administrator",
-        adminEmail,
-        passwordHash,
-        "admin"
-    );
-
-    console.log(
-        "Admin account created."
-    );
-
-} else {
-    db.prepare(`
-        UPDATE users
-        SET role = ?
-        WHERE email = ?
-    `).run(
-        "admin",
-        adminEmail
-    );
-
-    console.log(
-        "Admin account ready."
-    );
-}
-
-// ==========================================
 // START SERVER
 // ==========================================
 
@@ -1882,15 +1714,12 @@ app.listen(
     () => {
 
         console.log("");
-
         console.log(
             "======================================"
         );
-
         console.log(
             "       VELOCIA MOTORS SERVER"
         );
-
         console.log(
             "======================================"
         );
@@ -1900,7 +1729,7 @@ app.listen(
         );
 
         console.log(
-            "Database connected successfully."
+            "Supabase PostgreSQL database connected."
         );
 
         console.log(
@@ -1917,6 +1746,10 @@ app.listen(
 
         console.log(
             "Authentication API ready."
+        );
+
+        console.log(
+            "Quiz API ready."
         );
 
         console.log(

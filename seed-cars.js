@@ -1,4 +1,5 @@
-const db = require("./database");
+
+const sql = require("./database");
 
 const cars = [
     {
@@ -7,7 +8,7 @@ const cars = [
         price: "PKR 8.50 Crore",
         year: 2025,
         engine: "4.4L V8",
-        power: "617 HP",
+        power: 617,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Sedan",
@@ -20,7 +21,7 @@ const cars = [
         price: "PKR 7.20 Crore",
         year: 2025,
         engine: "4.0L V8",
-        power: "577 HP",
+        power: 577,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Coupe",
@@ -33,7 +34,7 @@ const cars = [
         price: "PKR 6.50 Crore",
         year: 2025,
         engine: "3.0L Flat-6",
-        power: "379 HP",
+        power: 379,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Coupe",
@@ -46,7 +47,7 @@ const cars = [
         price: "PKR 95 Lac",
         year: 2025,
         engine: "1.8L",
-        power: "138 HP",
+        power: 138,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Sedan",
@@ -59,7 +60,7 @@ const cars = [
         price: "PKR 1.05 Crore",
         year: 2025,
         engine: "1.5L Turbo",
-        power: "176 HP",
+        power: 176,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Sedan",
@@ -72,7 +73,7 @@ const cars = [
         price: "PKR 1.15 Crore",
         year: 2025,
         engine: "1.6L Turbo",
-        power: "177 HP",
+        power: 177,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "SUV",
@@ -85,7 +86,7 @@ const cars = [
         price: "PKR 1.10 Crore",
         year: 2025,
         engine: "2.0L",
-        power: "155 HP",
+        power: 155,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "SUV",
@@ -98,7 +99,7 @@ const cars = [
         price: "PKR 3.80 Crore",
         year: 2025,
         engine: "2.0L Turbo",
-        power: "261 HP",
+        power: 261,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Sedan",
@@ -111,7 +112,7 @@ const cars = [
         price: "PKR 2.90 Crore",
         year: 2025,
         engine: "2.0L Turbo",
-        power: "255 HP",
+        power: 255,
         transmission: "Automatic",
         fuel: "Petrol",
         body_type: "Sedan",
@@ -120,98 +121,81 @@ const cars = [
     }
 ];
 
-// ==========================================
-// CHECK IF CARS ALREADY EXIST
-// ==========================================
+async function seedCars() {
+    try {
+        console.log("======================================");
+        console.log("     VELOCIA MOTORS CAR DATABASE");
+        console.log("======================================");
 
-const existingCars = db
-    .prepare("SELECT COUNT(*) AS count FROM cars")
-    .get();
+        const existing = await sql`
+            SELECT COUNT(*)::int AS count
+            FROM cars
+        `;
 
-if (existingCars.count > 0) {
+        if (existing[0].count > 0) {
+            console.log(`Cars already exist: ${existing[0].count}`);
+            console.log("Skipping to avoid duplicates.");
+            return;
+        }
 
-    console.log("");
-    console.log("======================================");
-    console.log("Cars already exist in database.");
-    console.log("Skipping car seed to avoid duplicates.");
-    console.log("======================================");
+        for (const car of cars) {
+            await sql`
+                INSERT INTO cars (
+                    brand,
+                    model,
+                    name,
+                    price,
+                    year,
+                    engine,
+                    power,
+                    horsepower,
+                    transmission,
+                    fuel,
+                    fuel_type,
+                    body_type,
+                    image,
+                    description,
+                    status
+                )
+                VALUES (
+                    ${car.brand},
+                    ${car.name},
+                    ${car.name},
+                    ${car.price},
+                    ${car.year},
+                    ${car.engine},
+                    ${car.power},
+                    ${car.power},
+                    ${car.transmission},
+                    ${car.fuel},
+                    ${car.fuel},
+                    ${car.body_type},
+                    ${car.image},
+                    ${car.description},
+                    'Available'
+                )
+            `;
+        }
 
-    db.close();
-    process.exit(0);
+        const result = await sql`
+            SELECT id, brand, model, name, price, horsepower
+            FROM cars
+            ORDER BY id
+        `;
+
+        console.table(result);
+
+        console.log("======================================");
+        console.log(`${result.length} cars inserted successfully!`);
+        console.log("======================================");
+
+    } catch (error) {
+        console.error("CAR SEED ERROR:");
+        console.error(error);
+        process.exitCode = 1;
+    } finally {
+        await sql.end();
+    }
 }
 
-// ==========================================
-// INSERT CARS
-// ==========================================
-
-const insert = db.prepare(`
-    INSERT INTO cars
-    (
-        brand,
-        name,
-        price,
-        year,
-        engine,
-        power,
-        transmission,
-        fuel,
-        body_type,
-        image,
-        description,
-        status
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Available')
-`);
-
-const insertMany = db.transaction((cars) => {
-
-    for (const car of cars) {
-
-        insert.run(
-            car.brand,
-            car.name,
-            car.price,
-            car.year,
-            car.engine,
-            car.power,
-            car.transmission,
-            car.fuel,
-            car.body_type,
-            car.image,
-            car.description
-        );
-
-    }
-
-});
-
-insertMany(cars);
-
-// ==========================================
-// SHOW RESULT
-// ==========================================
-
-const result = db
-    .prepare(`
-        SELECT
-            id,
-            brand,
-            name,
-            price
-        FROM cars
-        ORDER BY id
-    `)
-    .all();
-
-console.log("");
-console.log("======================================");
-console.log("     VELOCIA MOTORS CAR DATABASE");
-console.log("======================================");
-
-console.table(result);
-
-console.log("======================================");
-console.log(`${result.length} cars inserted successfully!`);
-console.log("======================================");
-
-db.close();
+seedCars();

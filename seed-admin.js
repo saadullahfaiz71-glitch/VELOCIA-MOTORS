@@ -1,39 +1,74 @@
 const bcrypt = require("bcrypt");
-const db = require("./database");
+const sql = require("./database");
 
-const email = "admin@velocia.com";
-const password = "Admin@12345";
-const name = "Administrator";
+async function seedAdmin() {
+    try {
+        const email = "admin@velocia.com";
+        const password = process.env.ADMIN_PASSWORD;
 
-const existing = db
-    .prepare("SELECT id FROM users WHERE email = ?")
-    .get(email);
+        if (!password) {
+            throw new Error(
+                "ADMIN_PASSWORD environment variable is missing."
+            );
+        }
 
-if (existing) {
-    db.prepare(`
-        UPDATE users
-        SET name = ?, role = ?
-        WHERE email = ?
-    `).run(name, "admin", email);
+        const name = "Administrator";
+        const passwordHash = await bcrypt.hash(password, 12);
 
-    console.log("✅ Admin account already exists.");
-} else {
+        const existing = await sql`
+            SELECT id
+            FROM users
+            WHERE LOWER(email) = ${email}
+            LIMIT 1
+        `;
 
-    const passwordHash = bcrypt.hashSync(password, 10);
+        if (existing.length > 0) {
 
-    db.prepare(`
-        INSERT INTO users
-        (name, email, password_hash, role)
-        VALUES (?, ?, ?, ?)
-    `).run(
-        name,
-        email,
-        passwordHash,
-        "admin"
-    );
+            await sql`
+                UPDATE users
+                SET
+                    name = ${name},
+                    password_hash = ${passwordHash},
+                    role = 'admin'
+                WHERE LOWER(email) = ${email}
+            `;
 
-    console.log("✅ Admin account created.");
+            console.log("✅ Admin account updated successfully.");
+
+        } else {
+
+            await sql`
+                INSERT INTO users
+                (
+                    name,
+                    email,
+                    password_hash,
+                    role
+                )
+                VALUES
+                (
+                    ${name},
+                    ${email},
+                    ${passwordHash},
+                    'admin'
+                )
+            `;
+
+            console.log("✅ Admin account created successfully.");
+        }
+
+        await sql.end();
+        process.exit(0);
+
+    } catch (error) {
+        console.error("❌ Admin seed error:", error);
+
+        try {
+            await sql.end();
+        } catch {}
+
+        process.exit(1);
+    }
 }
 
-console.log("📧 Email: admin@velocia.com");
-console.log("🔑 Password: Admin@12345");
+seedAdmin();

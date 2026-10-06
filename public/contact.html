@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | VELOCIA MOTORS</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        /* NAVBAR */
+        header {
+            background: #111;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: #e11d48;
+            font-size: 25px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 15px;
+        }
+
+        nav a:hover {
+            color: #e11d48;
+        }
+
+        /* HERO */
+        .hero {
+            background: #181818;
+            color: white;
+            text-align: center;
+            padding: 70px 20px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .hero h1 span {
+            color: #e11d48;
+        }
+
+        .hero p {
+            color: #ccc;
+            font-size: 17px;
+        }
+
+        /* CONTACT SECTION */
+        .contact-section {
+            width: 85%;
+            max-width: 1100px;
+            margin: 50px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .box h2 {
+            margin-bottom: 25px;
+            font-size: 25px;
+        }
+
+        .box h2 span {
+            color: #e11d48;
+        }
+
+        .info {
+            margin-bottom: 22px;
+        }
+
+        .info h3 {
+            color: #e11d48;
+            margin-bottom: 6px;
+        }
+
+        .info p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* FORM */
+        form input,
+        form textarea {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        form input:focus,
+        form textarea:focus {
+            border-color: #e11d48;
+        }
+
+        textarea {
+            height: 130px;
+            resize: none;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #e11d48;
+            color: white;
+            border: none;
+            padding: 13px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #be123c;
+        }
+
+        /* SOCIAL LINKS */
+        .social {
+            margin-top: 25px;
+        }
+
+        .social a {
+            display: inline-block;
+            text-decoration: none;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .whatsapp {
+            background: #25D366;
+        }
+
+        .instagram {
+            background: #d62976;
+        }
+
+        .email {
+            background: #333;
+        }
+
+        .social a:hover {
+            opacity: 0.85;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #111;
+            color: #aaa;
+            text-align: center;
+            padding: 25px;
+            margin-top: 50px;
+        }
+
+        footer span {
+            color: #e11d48;
+        }
+
+        /* MOBILE */
+        @media (max-width: 750px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav {
+                text-align: center;
+            }
+
+            nav a {
+                margin: 0 7px;
+                line-height: 30px;
+            }
+
+            .contact-section {
+                grid-template-columns: 1fr;
+                width: 90%;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+
+        <div class="logo">VELOCIA MOTORS</div>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="cars.html">Cars</a>
+            <a href="upcoming.html">Upcoming</a>
+            <a href="contact.html">Contact</a>
+            <a href="cart.html">Cart</a>
+        </nav>
+
+    </header>
+
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1>Contact <span>VELOCIA</span></h1>
+        <p>Have a question? We'd love to hear from you.</p>
+    </section>
+
+
+    <!-- CONTACT CONTENT -->
+    <section class="contact-section">
+
+        <!-- CONTACT INFORMATION -->
+        <div class="box">
+
+            <h2>Get In <span>Touch</span></h2>
+
+            <div class="info">
+                <h3>Business Name</h3>
+                <p>VELOCIA MOTORS</p>
+            </div>
+
+            <div class="info">
+                <h3>Owner</h3>
+                <p>Saad</p>
+            </div>
+
+            <div class="info">
+                <h3>Email</h3>
+                <p>velociamotors@gmail.com</p>
+            </div>
+
+            <div class="info">
+                <h3>WhatsApp</h3>
+                <p>0340 1376274</p>
+            </div>
+
+            <div class="info">
+                <h3>Instagram</h3>
+                <p>@velociamotors.pk</p>
+            </div>
+
+            <div class="info">
+                <h3>Location</h3>
+                <p>Karachi, Pakistan</p>
+            </div>
+
+            <div class="social">
+
+                <a class="whatsapp"
+                   href="https://wa.me/923401376274"
+                   target="_blank">
+                    WhatsApp
+                </a>
+
+                <a class="email"
+                   href="mailto:velociamotors@gmail.com">
+                    Email
+                </a>
+
+                <a class="instagram"
+                   href="https://www.instagram.com/velociamotors.pk/"
+                   target="_blank">
+                    Instagram
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- MESSAGE FORM -->
+        <div class="box">
+
+            <h2>Send Us a <span>Message</span></h2>
+
+            <form action="mailto:velociamotors@gmail.com"
+                  method="post"
+                  enctype="text/plain">
+
+                <input
+                    type="text"
+                    name="Name"
+                    placeholder="Your Name"
+                    required>
+
+                <input
+                    type="email"
+                    name="Email"
+                    placeholder="Your Email"
+                    required>
+
+                <input
+                    type="text"
+                    name="Subject"
+                    placeholder="Subject"
+                    required>
+
+                <textarea
+                    name="Message"
+                    placeholder="Write your message..."
+                    required></textarea>
+
+                <button type="submit" class="btn">
+                    Send Message
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+        © 2026 <span>VELOCIA MOTORS</span> — All Rights Reserved.
+    </footer>
+
+</body>
+</html>
