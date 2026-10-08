@@ -1704,6 +1704,101 @@ app.post(
     }
 );
 
+// CREATE ORDER — PUBLIC CUSTOMER
+app.post("/api/orders", async (req, res) => {
+    try {
+        const {
+            order_id,
+            customer_name,
+            phone,
+            email,
+            address,
+            car_name,
+            car_price,
+            order_type,
+            preferred_contact,
+            message
+        } = req.body;
+
+        if (
+            !order_id ||
+            !customer_name ||
+            !phone ||
+            !car_name
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Order ID, customer name, phone and car name are required."
+            });
+        }
+
+        const existingOrder = await db`
+            SELECT id
+            FROM orders
+            WHERE order_id = ${order_id}
+            LIMIT 1
+        `;
+
+        if (existingOrder.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "This order already exists."
+            });
+        }
+
+        const result = await db`
+            INSERT INTO orders
+            (
+                order_id,
+                customer_name,
+                phone,
+                email,
+                address,
+                car_name,
+                car_price,
+                order_type,
+                preferred_contact,
+                message,
+                status
+            )
+            VALUES
+            (
+                ${String(order_id).trim()},
+                ${String(customer_name).trim()},
+                ${String(phone).trim()},
+                ${email || ""},
+                ${address || ""},
+                ${String(car_name).trim()},
+                ${car_price || ""},
+                ${order_type || "Purchase Request"},
+                ${preferred_contact || "WhatsApp"},
+                ${message || ""},
+                'Pending'
+            )
+            RETURNING *
+        `;
+
+        const order = result[0];
+
+        console.log("NEW ORDER:", order);
+
+        res.status(201).json({
+            success: true,
+            message: "Order submitted successfully!",
+            order
+        });
+
+    } catch (error) {
+        console.error("CREATE ORDER ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Unable to create order.",
+            error: error.message
+        });
+    }
+});
 // ==========================================
 // START SERVER
 // ==========================================
