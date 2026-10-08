@@ -1703,8 +1703,117 @@ app.post(
         }
     }
 );
+// ==========================================
+// WHATSAPP CLOUD API
+// ==========================================
 
+async function sendWhatsAppOrderNotification(order) {
+    try {
+        const token = process.env.WHATSAPP_TOKEN;
+        const phoneNumberId =
+            process.env.WHATSAPP_PHONE_NUMBER_ID;
+        const recipient =
+            process.env.WHATSAPP_RECIPIENT;
+
+        if (!token || !phoneNumberId || !recipient) {
+            console.error(
+                "WHATSAPP ERROR: Required environment variables are missing."
+            );
+
+            return {
+                success: false,
+                message: "WhatsApp environment variables are missing."
+            };
+        }
+
+        const apiVersion =
+            process.env.WHATSAPP_API_VERSION || "v23.0";
+
+        const message = [
+            "🚗 VELOCIA MOTORS — NEW ORDER",
+            "",
+            `Order ID: ${order.order_id}`,
+            `Customer: ${order.customer_name}`,
+            `Phone: ${order.phone}`,
+            `Email: ${order.email || "Not provided"}`,
+            `Address: ${order.address || "Not provided"}`,
+            "",
+            `Car: ${order.car_name}`,
+            `Price: ${order.car_price || "Not provided"}`,
+            `Order Type: ${order.order_type || "Purchase Request"}`,
+            `Preferred Contact: ${order.preferred_contact || "WhatsApp"}`,
+            "",
+            `Message: ${order.message || "No message"}`,
+            "",
+            "Status: Pending"
+        ].join("\n");
+
+        const response = await fetch(
+            `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    messaging_product: "whatsapp",
+                    recipient_type: "individual",
+                    to: recipient,
+                    type: "text",
+                    text: {
+                        preview_url: false,
+                        body: message
+                    }
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error(
+                "WHATSAPP API ERROR:",
+                data
+            );
+
+            return {
+                success: false,
+                message:
+                    data?.error?.message ||
+                    "WhatsApp API request failed.",
+                data
+            };
+        }
+
+        console.log(
+            "WHATSAPP NOTIFICATION SENT:",
+            data
+        );
+
+        return {
+            success: true,
+            data
+        };
+
+    } catch (error) {
+        console.error(
+            "WHATSAPP SEND ERROR:",
+            error
+        );
+
+        return {
+            success: false,
+            message: error.message
+        };
+    }
+}
+// ==========================================
 // CREATE ORDER — PUBLIC CUSTOMER
+// ==========================================
+
 app.post("/api/orders", async (req, res) => {
     try {
         const {
@@ -1743,7 +1852,8 @@ app.post("/api/orders", async (req, res) => {
         if (existingOrder.length > 0) {
             return res.status(409).json({
                 success: false,
-                message: "This order already exists."
+                message:
+                    "This order already exists."
             });
         }
 
@@ -1781,23 +1891,105 @@ app.post("/api/orders", async (req, res) => {
 
         const order = result[0];
 
-        console.log("NEW ORDER:", order);
+        console.log(
+            "NEW ORDER:",
+            order.order_id
+        );
+
+        // ======================================
+        // SEND WHATSAPP NOTIFICATION
+        // ======================================
+
+        const whatsappResult =
+            await sendWhatsAppOrderNotification(order);
+
+        if (!whatsappResult.success) {
+            console.error(
+                "ORDER SAVED BUT WHATSAPP FAILED:",
+                whatsappResult.message
+            );
+        }
 
         res.status(201).json({
             success: true,
-            message: "Order submitted successfully!",
-            order
+
+            message:
+                "Order submitted successfully!",
+
+            order,
+
+            whatsapp: {
+                sent:
+                    whatsappResult.success
+            }
         });
 
     } catch (error) {
-        console.error("CREATE ORDER ERROR:", error);
+        console.error(
+            "CREATE ORDER ERROR:",
+            error
+        );
 
         res.status(500).json({
             success: false,
-            message: "Unable to create order.",
-            error: error.message
+            message:
+                "Unable to create order."
         });
     }
+});
+// ==========================================
+// WHATSAPP WEBHOOK VERIFICATION
+// ==========================================
+
+app.get("/webhook/whatsapp", (req, res) => {
+    const mode =
+        req.query["hub.mode"];
+
+    const token =
+        req.query["hub.verify_token"];
+
+    const challenge =
+        req.query["hub.challenge"];
+
+    const verifyToken =
+        process.env.WHATSAPP_VERIFY_TOKEN;
+
+    if (
+        mode === "subscribe" &&
+        token === verifyToken
+    ) {
+        console.log(
+            "WHATSAPP WEBHOOK VERIFIED"
+        );
+
+        return res
+            .status(200)
+            .send(challenge);
+    }
+
+    console.error(
+        "WHATSAPP WEBHOOK VERIFICATION FAILED"
+    );
+
+    res.sendStatus(403);
+});
+
+
+// ==========================================
+// WHATSAPP WEBHOOK EVENTS
+// ==========================================
+
+app.post("/webhook/whatsapp", (req, res) => {
+    console.log(
+        "WHATSAPP WEBHOOK EVENT:",
+        JSON.stringify(
+            req.body,
+            null,
+            2
+        )
+    );
+
+    res.sendStatus(200);
 });
 // ==========================================
 // START SERVER
