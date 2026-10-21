@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="description" content="Discover exceptional cars at Velocia Motors. Explore our curated collection, compare specifications and book an inspection.">
     <title>VELOCIA MOTORS | Premium Cars</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
 
@@ -1319,6 +1322,585 @@
             }
         }
 
+
+        /* =====================================================
+           REFINED SHOWROOM THEME
+        ===================================================== */
+
+        :root {
+            color-scheme: dark;
+            --ink: #0b0e0c;
+            --surface: #111512;
+            --surface-raised: #171c18;
+            --text: #f2f0e9;
+            --muted: #aaa99f;
+            --line: rgba(238, 232, 214, 0.14);
+            --gold: #c9ad76;
+            --gold-light: #e5d2a6;
+        }
+
+        body {
+            background: var(--ink);
+            color: var(--text);
+            font-family: "Manrope", sans-serif;
+            line-height: 1.65;
+        }
+
+        h1,
+        h2,
+        .car-info h3,
+        .coming-info h3 {
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .navbar {
+            height: 82px;
+            padding-inline: 7%;
+            background: rgba(11, 14, 12, 0.84);
+            border-bottom-color: var(--line);
+        }
+
+        .logo {
+            font-size: 22px;
+            letter-spacing: 3px;
+        }
+
+        .logo span,
+        .section-label,
+        .coming-label,
+        .car-price,
+        .coming-price {
+            color: var(--gold-light);
+        }
+
+        .nav-links a {
+            color: #d0cec5;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-light);
+        }
+
+        .nav-login {
+            border-color: rgba(201, 173, 118, 0.55);
+            border-radius: 3px;
+        }
+
+        .nav-login:hover {
+            border-color: var(--gold-light);
+            background: rgba(201, 173, 118, 0.1);
+        }
+
+        .hero {
+            min-height: 850px;
+            padding: 160px 7% 120px;
+            background: #0a0c0b;
+            isolation: isolate;
+        }
+
+        .hero::after {
+            position: absolute;
+            z-index: 1;
+            inset: 0;
+            content: "";
+            background: linear-gradient(90deg, rgba(8, 11, 9, 0.96) 0%, rgba(8, 11, 9, 0.83) 35%, rgba(8, 11, 9, 0.18) 78%), linear-gradient(0deg, rgba(8, 11, 9, 0.78), transparent 35%);
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            z-index: 1;
+            opacity: 0.18;
+        }
+
+        .hero-car {
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.8;
+            filter: none;
+            animation: none;
+        }
+
+        .hero-car img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 56%;
+        }
+
+        .hero-content {
+            width: 56%;
+            max-width: 700px;
+        }
+
+        .eyebrow,
+        .coming-label {
+            padding: 0;
+            color: var(--gold-light);
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+
+        .eyebrow::before,
+        .coming-label::before {
+            background: var(--gold);
+            box-shadow: 0 0 12px rgba(201, 173, 118, 0.6);
+        }
+
+        .hero h1 {
+            max-width: 650px;
+            margin-bottom: 22px;
+            font-size: 112px;
+            line-height: 0.86;
+            font-weight: 500;
+        }
+
+        .hero h1 span {
+            color: var(--gold-light);
+            text-shadow: none;
+        }
+
+        .hero p,
+        .section-heading p {
+            color: #c2c1b8;
+            font-size: 15px;
+        }
+
+        .hero p {
+            max-width: 490px;
+        }
+
+        .btn {
+            min-height: 50px;
+            padding: 14px 22px;
+            border-radius: 3px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            color: #171710;
+            background: var(--gold-light);
+            box-shadow: none;
+        }
+
+        .btn-primary:hover {
+            color: #111;
+            background: #f0dfb7;
+            box-shadow: 0 12px 30px rgba(201, 173, 118, 0.18);
+        }
+
+        .btn-secondary {
+            border-color: rgba(238, 232, 214, 0.38);
+            background: rgba(12, 15, 13, 0.34);
+        }
+
+        .stats {
+            right: 7%;
+            left: 7%;
+            justify-content: flex-start;
+            gap: 0;
+            padding-top: 22px;
+            border-top: 1px solid rgba(238, 232, 214, 0.28);
+        }
+
+        .stat {
+            min-width: 150px;
+            padding-right: 28px;
+        }
+
+        .stat + .stat {
+            padding-left: 28px;
+            border-left: 1px solid var(--line);
+        }
+
+        .stat h3 {
+            color: var(--gold-light);
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: 30px;
+            font-weight: 600;
+        }
+
+        .stat p {
+            color: #b0afa6;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .section {
+            padding: 112px 7%;
+        }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .section-heading h2,
+        .cta h2 {
+            font-size: 56px;
+            line-height: 1;
+            font-weight: 500;
+        }
+
+        .section-heading {
+            margin-bottom: 42px;
+        }
+
+        .cars-grid,
+        .coming-grid {
+            gap: 18px;
+        }
+
+        .car-card,
+        .coming-card,
+        .feature {
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background: var(--surface);
+        }
+
+        .car-card:hover,
+        .coming-card:hover {
+            border-color: rgba(201, 173, 118, 0.6);
+            box-shadow: 0 22px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .car-image,
+        .coming-image {
+            height: 250px;
+            background: #151915;
+        }
+
+        .car-info,
+        .coming-info {
+            padding: 24px;
+        }
+
+        .car-brand,
+        .coming-brand {
+            color: var(--gold);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .car-info h3,
+        .coming-info h3 {
+            margin-block: 8px 12px;
+            font-size: 27px;
+            line-height: 1.05;
+        }
+
+        .car-meta span,
+        .coming-meta span {
+            color: #c5c3ba;
+            border: 1px solid var(--line);
+            border-radius: 2px;
+            background: #191e1a;
+        }
+
+        .card-btn,
+        .coming-btn {
+            border-color: rgba(201, 173, 118, 0.4);
+            border-radius: 2px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card-btn:hover,
+        .coming-btn:hover {
+            color: #171710;
+            border-color: var(--gold-light);
+            background: var(--gold-light);
+        }
+
+        .coming-section,
+        .about-section {
+            background: #101411;
+        }
+
+        .coming-section::before {
+            display: none;
+        }
+
+        .coming-badge {
+            border-color: rgba(201, 173, 118, 0.55);
+            border-radius: 2px;
+            background: rgba(20, 22, 17, 0.86);
+            color: var(--gold-light);
+        }
+
+        .coming-note {
+            color: #99998f;
+        }
+
+        .feature {
+            padding: 28px;
+        }
+
+        .feature:hover {
+            border-color: rgba(201, 173, 118, 0.55);
+        }
+
+        .feature-icon {
+            color: var(--gold-light);
+            background: rgba(201, 173, 118, 0.1);
+            border: 1px solid rgba(201, 173, 118, 0.22);
+            border-radius: 3px;
+        }
+
+        .feature p,
+        .cta p {
+            color: #b1b0a7;
+        }
+
+        .cta {
+            margin: 0;
+            padding: 84px 7%;
+            border: 0;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            border-radius: 0;
+            background: linear-gradient(105deg, #171b16, #0d100e 70%);
+        }
+
+        .cta::before {
+            display: none;
+        }
+
+        .cta h2 {
+            max-width: 600px;
+        }
+
+        footer {
+            padding-inline: 7%;
+            border-top: 0;
+            background: #090c0a;
+        }
+
+        footer h4 {
+            color: var(--gold-light);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        footer li a:hover {
+            color: var(--gold-light);
+        }
+
+        .menu-toggle {
+            display: none;
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--gold-light);
+            outline-offset: 4px;
+        }
+
+        @media (max-width: 1100px) {
+            .hero h1 {
+                font-size: 90px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .navbar {
+                height: 72px;
+                padding-inline: 24px;
+            }
+
+            .navbar nav {
+                position: absolute;
+                top: 72px;
+                right: 16px;
+                left: 16px;
+                display: none;
+                padding: 8px 18px;
+                border: 1px solid var(--line);
+                background: rgba(13, 16, 14, 0.98);
+                box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+            }
+
+            .navbar nav.is-open {
+                display: block;
+            }
+
+            .nav-links {
+                align-items: stretch;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .nav-links li:nth-child(-n+4) {
+                display: block;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 13px 4px;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .nav-links li:last-child a {
+                border-bottom: 0;
+            }
+
+            .nav-login {
+                padding-inline: 4px;
+            }
+
+            .menu-toggle {
+                width: 42px;
+                height: 42px;
+                display: grid;
+                align-content: center;
+                justify-items: center;
+                gap: 5px;
+                border: 1px solid var(--line);
+                border-radius: 2px;
+                background: transparent;
+                cursor: pointer;
+            }
+
+            .menu-toggle span {
+                width: 17px;
+                height: 1px;
+                background: var(--gold-light);
+                transition: transform 0.2s ease;
+            }
+
+            .menu-toggle[aria-expanded="true"] span:first-child {
+                transform: translateY(3px) rotate(45deg);
+            }
+
+            .menu-toggle[aria-expanded="true"] span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .menu-toggle[aria-expanded="true"] span:last-child {
+                transform: translateY(-9px) rotate(-45deg);
+            }
+
+            .hero {
+                min-height: 820px;
+                padding: 130px 25px 145px;
+            }
+
+            .hero::after {
+                background: linear-gradient(90deg, rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.45)), linear-gradient(0deg, rgba(8, 11, 9, 0.78), transparent 48%);
+            }
+
+            .hero-content {
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 78px;
+            }
+
+            .hero-car {
+                right: auto;
+                bottom: 0;
+                height: 100%;
+                opacity: 0.62;
+            }
+
+            .stats {
+                right: 25px;
+                left: 25px;
+                gap: 0;
+            }
+
+            .stat {
+                min-width: 0;
+                flex: 1;
+                padding-right: 12px;
+            }
+
+            .stat + .stat {
+                padding-left: 12px;
+            }
+
+            .section {
+                padding: 78px 25px;
+            }
+
+            .section-heading h2,
+            .cta h2 {
+                font-size: 46px;
+            }
+
+            .cta {
+                padding: 65px 25px;
+            }
+
+            footer {
+                padding-inline: 25px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .hero {
+                min-height: 790px;
+            }
+
+            .hero h1 {
+                font-size: 62px;
+            }
+
+            .hero p {
+                font-size: 14px;
+            }
+
+            .hero-buttons {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .stats {
+                bottom: 28px;
+            }
+
+            .stat h3 {
+                font-size: 25px;
+            }
+
+            .stat p {
+                font-size: 8px;
+                letter-spacing: 0;
+            }
+
+            .section-heading h2,
+            .cta h2 {
+                font-size: 40px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
     </style>
 </head>
 
@@ -1337,7 +1919,7 @@
         </a>
 
 
-        <nav>
+        <nav id="primary-navigation">
 
             <ul class="nav-links">
 
@@ -1380,6 +1962,12 @@
             </ul>
 
         </nav>
+
+        <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
     </header>
 
@@ -1444,7 +2032,7 @@
 
             <img
                 src="images/hero/wallhaven-rrwvv7.jpg"
-                alt="Premium BMW"
+                alt="A premium sports car in the Velocia Motors showroom"
             >
 
         </div>
@@ -1539,7 +2127,7 @@
                 <div class="car-image">
 
                     <img
-                        src="images/cars/R.jpg"
+                        src="images/cars/BMW-M5-Competition-6850_1.jpg"
                         alt="BMW M5 Competition"
                     >
 
@@ -2304,5 +2892,24 @@
     </footer>
 
 
+    <script>
+        const menuButton = document.querySelector(".menu-toggle");
+        const primaryNavigation = document.querySelector("#primary-navigation");
+
+        menuButton.addEventListener("click", () => {
+            const isExpanded = menuButton.getAttribute("aria-expanded") === "true";
+            menuButton.setAttribute("aria-expanded", String(!isExpanded));
+            menuButton.setAttribute("aria-label", isExpanded ? "Open navigation" : "Close navigation");
+            primaryNavigation.classList.toggle("is-open", !isExpanded);
+        });
+
+        primaryNavigation.addEventListener("click", (event) => {
+            if (event.target.closest("a")) {
+                menuButton.setAttribute("aria-expanded", "false");
+                menuButton.setAttribute("aria-label", "Open navigation");
+                primaryNavigation.classList.remove("is-open");
+            }
+        });
+    </script>
 </body>
 </html>
