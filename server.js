@@ -386,6 +386,98 @@ app.get(
 );
 
 // ==========================================
+// PUBLIC — CONTACT FORM
+// ==========================================
+
+async function sendWhatsAppConfirmation(to, enquiry) {
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const accessToken = process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
+    const templateName = process.env.WHATSAPP_TEMPLATE_NAME || "velocia_enquiry_confirmation";
+    const templateLanguage = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
+
+    if (!phoneNumberId || !accessToken) return { sent: false, message: null };
+
+    try {
+        const response = await fetch(
+            `https://graph.facebook.com/v22.0/${encodeURIComponent(phoneNumberId)}/messages`,
+            {
+                method: "POST",
+                headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messaging_product: "whatsapp",
+                    recipient_type: "individual",
+                    to: to.replace(/\+/g, ""),
+                    type: "template",
+                    template: {
+                        name: templateName,
+                        language: { code: templateLanguage },
+                        components: [{ type: "body", parameters: [
+                            { type: "text", text: enquiry.name },
+                            { type: "text", text: enquiry.subject || "General enquiry" },
+                            { type: "text", text: enquiry.message || "" }
+                        ] }]
+                    }
+                }),
+                signal: AbortSignal.timeout(10000)
+            }
+        );
+        const providerResult = await response.json();
+        if (!response.ok) {
+            console.error("CONTACT WHATSAPP PROVIDER ERROR:", providerResult);
+            return { sent: false, message: "WhatsApp confirmation could not be sent." };
+        }
+        return { sent: true, message: "WhatsApp confirmation sent." };
+    } catch (error) {
+        console.error("CONTACT WHATSAPP REQUEST ERROR:", error);
+        return { sent: false, message: "WhatsApp confirmation could not be sent." };
+    }
+}
+
+app.post("/api/contact", async (req, res) => {
+    try {
+        const name = String(req.body.name || "").trim();
+        const email = String(req.body.email || "").trim();
+        const phone = String(req.body.phone || "").trim();
+        const subject = String(req.body.subject || "").trim();
+        const message = String(req.body.message || "").trim();
+        const smsConsent = req.body.smsConsent === true || req.body.smsConsent === "true";
+
+        if (!name || !email || !subject || !message || name.length > 120 || email.length > 254 ||
+            phone.length > 40 || subject.length > 160 || message.length > 5000 ||
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ success: false, message: "Enter a valid name, email address, subject, and message." });
+        }
+        if (smsConsent && !phone) {
+            return res.status(400).json({ success: false, message: "Enter a phone number to receive a WhatsApp confirmation." });
+        }
+        if (phone && smsConsent && !/^\+[1-9]\d{7,14}$/.test(phone)) {
+            return res.status(400).json({ success: false, message: "Enter your phone number in international format, such as +923401376274." });
+        }
+
+        const result = await db`
+            INSERT INTO messages (name, email, phone, subject, sms_consent, message)
+            VALUES (${name}, ${email}, ${phone || null}, ${subject}, ${smsConsent}, ${message})
+            RETURNING id
+        `;
+
+        let smsResult = { sent: false, message: null };
+        if (phone && smsConsent) {
+            smsResult = await sendWhatsAppConfirmation(phone, { name, subject, message });
+        }
+        res.status(201).json({
+            success: true,
+            message: "Your enquiry has been received.",
+            messageId: result[0].id,
+            smsSent: smsResult.sent,
+            smsMessage: smsResult.message
+        });
+    } catch (error) {
+        console.error("CONTACT FORM ERROR:", error);
+        res.status(500).json({ success: false, message: "We could not send your message right now. Please try again." });
+    }
+});
+
+// ==========================================
 // LOGOUT
 // ==========================================
 
