@@ -391,7 +391,8 @@ app.get(
 
 async function sendWhatsAppConfirmation(to, enquiry) {
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-    const accessToken = process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
+    const accessToken = String(process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN || "")
+        .replace(/[^A-Za-z0-9_-]/g, "");
     const templateName = process.env.WHATSAPP_TEMPLATE_NAME || "velocia_enquiry_confirmation";
     const templateLanguage = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
 
